@@ -1,0 +1,72 @@
+/* App.css */
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: sans-serif;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.app-header {
+  height: 40px;
+  background-color: #222;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 10px;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.workspace-pane {
+  background-color: #fff;
+  position: relative;
+  height: 100%;
+}
+
+.blockly-workspace {
+  width: 100%;
+  height: 100%;
+}
+*/
+.console-pane {
+  background-color: #2f2f2f;
+  color: #0f0;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.terminal-pane {
+  background-color: #1e1e1e;
+  color: #fff;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.split > .gutter {
+  background-color: #ccc; 
+  background-repeat: no-repeat;
+  background-position: 50%;
+}
+.split > .gutter:hover {
+  background-color: #999;
+}
+.split-horizontal > .gutter {
+  cursor: col-resize;
+}
+.split-vertical > .gutter {
+  cursor: row-resize;
+}

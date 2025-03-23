@@ -1,0 +1,12 @@
+{
+  "name": "my-visual-lang-project",
+  "private": true,
+  "scripts": {
+    "client": "npm run dev --prefix client",
+    "server": "node server/index.js",
+    "dev": "concurrently \"npm run client\" \"npm run server\""
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  }
+}
