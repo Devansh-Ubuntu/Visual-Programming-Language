@@ -1,12 +1,12 @@
 # Visual-Programming-Language
 
-hi
+plan
 
-hello
+1) Terminal and add blocks
+2) ds
+3) spirite
+4) docs
 
+finishing touch and workspace enable
 
-devansh
-rhth
-jhfytru
-
-mnfdbrguite
+stop buttons
