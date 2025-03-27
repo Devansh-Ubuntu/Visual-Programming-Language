@@ -7,6 +7,7 @@ import "./App.css";
 
 function App() {
   const [generatedCode, setGeneratedCode] = useState("");
+  const [terminalOutput, setTerminalOutput] = useState("");
   const interpreterRef = useRef(null);
 
   useEffect(() => {
@@ -24,13 +25,33 @@ function App() {
     }, 100);
   };
 
+  const handleStop = () => {
+    console.log("Stop clicked");
+    // Implement stop functionality as needed.
+  };
+
+  // Handle user input from the terminal
+  const handleUserInput = (input) => {
+    console.log("User input:", input);
+    // For demonstration, we just append it to terminal output.
+    setTerminalOutput((prev) => prev + "\r\nUser input: " + input);
+  };
+
   return (
     <div className="app-container">
-      <Header onRun={handleRun} onStop={() => alert("Stop clicked!")} />
-      <MainLayout setGeneratedCode={setGeneratedCode} />
+      <Header onRun={handleRun} onStop={handleStop} />
+      <MainLayout
+        setGeneratedCode={setGeneratedCode}
+        terminalOutput={terminalOutput}
+        onUserInput={handleUserInput}
+      />
       <div style={{ marginTop: "20px" }}>
         <h3>Interpreter</h3>
-        <JSInterpreterRunner ref={interpreterRef} code={generatedCode} />
+        <JSInterpreterRunner
+          ref={interpreterRef}
+          code={generatedCode}
+          setTerminalOutput={setTerminalOutput}
+        />
       </div>
       <div>
         <h4>Generated Code:</h4>

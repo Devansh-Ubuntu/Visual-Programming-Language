@@ -1,38 +1,50 @@
 // src/components/JSInterpreterRunner.jsx
-import React, { useState, useImperativeHandle, forwardRef } from "react";
+import React, { useImperativeHandle, forwardRef } from "react";
 
-const JSInterpreterRunner = forwardRef(({ code }, ref) => {
-  const [output, setOutput] = useState("");
-
+const JSInterpreterRunner = forwardRef(({ code, setTerminalOutput }, ref) => {
   useImperativeHandle(
     ref,
     () => ({
       runCode() {
         if (!code || !code.trim()) {
           console.error("No code to run!");
-          setOutput("No code provided!");
+          setTerminalOutput("No code provided!\n");
           return;
         }
-        setOutput("");
+        // Clear previous output
+        setTerminalOutput("");
         console.log("Executing Code:", code);
 
         try {
+          // Run code in a sandbox using JS-Interpreter (assumed to be loaded on window)
           const interpreter = new window.Interpreter(code, (interpreter, scope) => {
             console.log("JS-Interpreter Initialized");
+            // Override console.log
             const logFn = interpreter.createNativeFunction(function (text) {
               const logText = text.toString();
               console.log("Interpreter log:", logText);
-              setOutput((prev) => prev + logText + "\n");
+              setTerminalOutput((prev) => prev + logText + "\n");
             });
             const consoleObj = { log: logFn };
             interpreter.setProperty(scope, "console", consoleObj);
 
+            // Replace alert with terminal output
             const alertFn = interpreter.createNativeFunction(function (text) {
-              alert(text);
+              const alertText = "ALERT: " + text.toString();
+              setTerminalOutput((prev) => prev + alertText + "\n");
             });
             interpreter.setProperty(scope, "alert", alertFn);
+
+            // Optionally, you can define a custom prompt function to support input.
+            // For example:
+            // const promptFn = interpreter.createNativeFunction(function(text) {
+            //   // Implement a mechanism to fetch input from your TerminalPane,
+            //   // perhaps via a callback or a Promise.
+            // });
+            // interpreter.setProperty(scope, "prompt", promptFn);
           });
 
+          // Step through the interpreter to simulate real-time terminal output.
           function step() {
             try {
               if (interpreter.step()) {
@@ -40,31 +52,25 @@ const JSInterpreterRunner = forwardRef(({ code }, ref) => {
                 setTimeout(step, 50);
               } else {
                 console.log("Execution finished.");
-                setOutput((prev) => prev + "Execution finished.\n");
+                setTerminalOutput((prev) => prev + "Execution finished.\n");
               }
             } catch (err) {
               console.error("Interpreter error during step:", err);
-              setOutput((prev) => prev + "Interpreter error: " + err + "\n");
+              setTerminalOutput((prev) => prev + "Interpreter error: " + err + "\n");
             }
           }
           step();
         } catch (error) {
           console.error("Error initializing interpreter:", error);
-          setOutput("Error initializing interpreter: " + error);
+          setTerminalOutput("Error initializing interpreter: " + error);
         }
       }
     }),
-    [code]
+    [code, setTerminalOutput]
   );
 
-  return (
-    <div>
-      <h3>Interpreter Output:</h3>
-      <pre style={{ background: "#222", color: "#0f0", padding: "10px" }}>
-        {output}
-      </pre>
-    </div>
-  );
+  // No UI rendered here—the terminal output is now managed in TerminalPane.
+  return null;
 });
 
 export default JSInterpreterRunner;
