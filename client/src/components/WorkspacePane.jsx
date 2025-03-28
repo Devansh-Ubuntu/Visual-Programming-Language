@@ -1,4 +1,3 @@
-// src/components/WorkspacePane.jsx
 import React, { useEffect, useRef, useCallback } from "react";
 import * as Blockly from "blockly/core";
 import * as libraryBlocks from "blockly/blocks";
@@ -13,9 +12,10 @@ function textToDomPolyfill(xmlText) {
   return parser.parseFromString(xmlText, "text/xml").documentElement;
 }
 
-export default function WorkspacePane({ setGeneratedCode }) {
+export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange }) {
   const blocklyDiv = useRef(null);
   const workspaceRef = useRef(null);
+  const lastXmlRef = useRef("");
 
   const updateCode = useCallback(() => {
     if (workspaceRef.current && javascriptGenerator.workspaceToCode) {
@@ -25,7 +25,16 @@ export default function WorkspacePane({ setGeneratedCode }) {
     } else {
       console.error("Code generation is not available.");
     }
-  }, [setGeneratedCode]);
+    if (onWorkspaceChange && workspaceRef.current) {
+      const xmlDom = Blockly.Xml.workspaceToDom(workspaceRef.current);
+      const xmlText = Blockly.Xml.domToText(xmlDom);
+      // Only update if the XML has changed
+      if (xmlText !== lastXmlRef.current) {
+        lastXmlRef.current = xmlText;
+        onWorkspaceChange(xmlText);
+      }
+    }
+  }, [setGeneratedCode, onWorkspaceChange]);
 
   useEffect(() => {
     if (blocklyDiv.current) {

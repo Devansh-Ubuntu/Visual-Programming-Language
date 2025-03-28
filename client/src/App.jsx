@@ -1,13 +1,16 @@
-// src/App.jsx
 import React, { useRef, useState, useEffect } from "react";
 import Header from "./components/Header";
 import MainLayout from "./layouts/MainLayout";
 import JSInterpreterRunner from "./components/JSInterpreterRunner";
+import { saveWorkspace } from "./components/SaveWorkspace";
+import { loadWorkspace } from "./components/LoadWorkspace";
 import "./App.css";
 
 function App() {
   const [generatedCode, setGeneratedCode] = useState("");
   const [terminalOutput, setTerminalOutput] = useState("");
+  const [terminalWidth, setTerminalWidth] = useState(300);
+  const [workspaceState, setWorkspaceState] = useState(null);
   const interpreterRef = useRef(null);
 
   useEffect(() => {
@@ -27,35 +30,63 @@ function App() {
 
   const handleStop = () => {
     console.log("Stop clicked");
-    // Implement stop functionality as needed.
+    if (interpreterRef.current) {
+      interpreterRef.current.stopCode();
+    }
   };
 
-  // Handle user input from the terminal
   const handleUserInput = (input) => {
     console.log("User input:", input);
-    // For demonstration, we just append it to terminal output.
     setTerminalOutput((prev) => prev + "\r\nUser input: " + input);
   };
 
+  const handleResize = (event) => {
+    setTerminalWidth(event.target.value);
+  };
+
+  // Save workspace state to local file.
+  const handleSave = () => {
+    // Convert your Blockly workspace to XML
+    const xmlDom = Blockly.Xml.workspaceToDom(workspaceRef.current);
+    const xmlText = Blockly.Xml.domToText(xmlDom);
+    // Save the XML text
+    saveWorkspace(xmlText);
+  };
+
+  // Load workspace state from local file.
+  const handleLoad = () => {
+    loadWorkspace((loadedState) => {
+      if (loadedState) {
+        setWorkspaceState(loadedState);
+        // Restore the workspace as needed (e.g., Blockly.Xml.domToWorkspace(loadedState, workspaceRef.current))
+      }
+    });
+  };
+
   return (
-    <div className="app-container">
-      <Header onRun={handleRun} onStop={handleStop} />
-      <MainLayout
-        setGeneratedCode={setGeneratedCode}
-        terminalOutput={terminalOutput}
-        onUserInput={handleUserInput}
-      />
-      <div style={{ marginTop: "20px" }}>
-        <h3>Interpreter</h3>
+    <div className="app-container" style={{ display: "flex", height: "100vh" }}>
+      <div className="workspace" style={{ flex: 1, transition: "width 0.3s ease" }}>
+        <Header onRun={handleRun} onStop={handleStop} onSave={handleSave} onLoad={handleLoad} />
+        <MainLayout
+          setGeneratedCode={setGeneratedCode}
+          terminalOutput={terminalOutput}
+          onUserInput={handleUserInput}
+        />
+      </div>
+      <div className="terminal-container" style={{ width: `${terminalWidth}px`, transition: "width 0.3s ease" }}>
         <JSInterpreterRunner
           ref={interpreterRef}
           code={generatedCode}
           setTerminalOutput={setTerminalOutput}
         />
-      </div>
-      <div>
-        <h4>Generated Code:</h4>
-        <pre>{generatedCode}</pre>
+        <input
+          type="range"
+          min="200"
+          max="800"
+          value={terminalWidth}
+          onChange={handleResize}
+          style={{ width: "100%" }}
+        />
       </div>
     </div>
   );

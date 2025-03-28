@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { Rnd } from "react-rnd";
 import TerminalPane from "./TerminalPane";
 
-export default function DraggableTerminal({ terminalOutput, onUserInput }) {
-  // Default floating state (customize these as desired)
+export default function DraggableTerminal({ terminalOutput, onUserInput, onDockChange }) {
+  // Default floating state (customize as desired)
   const defaultFloating = { x: 200, y: 200, width: 500, height: 300 };
 
-  // Save the last floating (undocked) state.
+  // Save last floating (undocked) state.
   const [floatingPosition, setFloatingPosition] = useState({ x: defaultFloating.x, y: defaultFloating.y });
   const [floatingSize, setFloatingSize] = useState({ width: defaultFloating.width, height: defaultFloating.height });
 
@@ -38,7 +38,7 @@ export default function DraggableTerminal({ terminalOutput, onUserInput }) {
     setIsDockingPreview(minDist <= snapThreshold);
   };
 
-  // On drag stop, decide to dock or undock.
+  // On drag stop, decide whether to dock or undock.
   const handleDragStop = (e, d) => {
     setIsDockingPreview(false);
     const newX = d.x;
@@ -51,17 +51,19 @@ export default function DraggableTerminal({ terminalOutput, onUserInput }) {
     const distToBottom = winHeight - (newY + size.height);
     const minDist = Math.min(distToLeft, distToTop, distToRight, distToBottom);
 
-    // If already docked and you’ve moved far enough away, undock by restoring floating state.
+    // If already docked and moved sufficiently away, undock.
     if (isDocked) {
       const dx = Math.abs(newX - position.x);
       const dy = Math.abs(newY - position.y);
       if (dx > undockMovementThreshold || dy > undockMovementThreshold) {
+        // Restore saved floating state.
         setPosition(floatingPosition);
         setSize(floatingSize);
         setIsDocked(false);
+        onDockChange && onDockChange({ docked: false });
         return;
       }
-      // If not moved far enough, remain docked.
+      // Otherwise remain docked.
       setPosition(position);
       return;
     }
@@ -70,10 +72,11 @@ export default function DraggableTerminal({ terminalOutput, onUserInput }) {
     if (minDist > snapThreshold) {
       setPosition({ x: newX, y: newY });
       setFloatingPosition({ x: newX, y: newY });
+      onDockChange && onDockChange({ docked: false });
       return;
     }
 
-    // Otherwise, we are close to an edge: dock.
+    // Otherwise, we're near an edge: dock.
     // Save current floating state before docking.
     setFloatingPosition({ x: newX, y: newY });
     setFloatingSize({ width: size.width, height: size.height });
@@ -82,18 +85,22 @@ export default function DraggableTerminal({ terminalOutput, onUserInput }) {
       // Dock to left.
       setPosition({ x: 0, y: 0 });
       setSize({ width: 350, height: winHeight });
+      onDockChange && onDockChange({ docked: true, edge: "left", dockSize: { width: 350 } });
     } else if (minDist === distToRight) {
       // Dock to right.
       setPosition({ x: winWidth - 350, y: 0 });
       setSize({ width: 350, height: winHeight });
+      onDockChange && onDockChange({ docked: true, edge: "right", dockSize: { width: 350 } });
     } else if (minDist === distToTop) {
       // Dock to top.
       setPosition({ x: 0, y: 0 });
       setSize({ width: winWidth, height: 300 });
+      onDockChange && onDockChange({ docked: true, edge: "top", dockSize: { height: 300 } });
     } else if (minDist === distToBottom) {
       // Dock to bottom.
       setPosition({ x: 0, y: winHeight - 300 });
       setSize({ width: winWidth, height: 300 });
+      onDockChange && onDockChange({ docked: true, edge: "bottom", dockSize: { height: 300 } });
     }
     setIsDocked(true);
   };

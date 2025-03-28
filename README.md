@@ -2,11 +2,16 @@
 
 plan
 
-1) Terminal and add blocks
-2) ds
-3) spirite
-4) docs
+1) Terminal, faster and dynamic resize and floating and docking
+2) add blocks
+3) ds
+4) spirite
+5) docs
 
 finishing touch and workspace enable
 
-stop buttons
+
+save and load
+
+done:
+stop button
