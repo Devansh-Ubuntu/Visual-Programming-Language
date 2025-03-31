@@ -1,9 +1,10 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Rnd } from "react-rnd";
 import TerminalPane from "./TerminalPane";
 
 export default function DraggableTerminal({ terminalOutput, onUserInput, onDockChange }) {
   const defaultFloating = { x: 200, y: 200, width: 500, height: 300 };
+
 
   const [floatingPosition, setFloatingPosition] = useState({ x: defaultFloating.x, y: defaultFloating.y });
   const [floatingSize, setFloatingSize] = useState({ width: defaultFloating.width, height: defaultFloating.height });
@@ -99,7 +100,7 @@ export default function DraggableTerminal({ terminalOutput, onUserInput, onDockC
   };
 
   // For a visual cue (optional)
-  const boxShadowStyle = isDockingPreview ? "0 0 15px 5px rgba(0,255,0,0.7)" : "none";
+  const boxShadowStyle = isDockingPreview ? "0 0 15px 5px rgba(85, 0, 255, 0.36)" : "none";
 
   return (
     <Rnd
