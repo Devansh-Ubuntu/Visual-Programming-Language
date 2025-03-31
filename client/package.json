@@ -12,6 +12,7 @@
   "dependencies": {
     "axios": "^1.8.2",
     "blockly": "^11.2.1",
+    "js-interpreter": "^6.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-rnd": "^10.5.2",
