@@ -1,20 +1,43 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import { Terminal as XTerminal } from "xterm";
+import { FitAddon } from "xterm-addon-fit";  // <-- Import FitAddon
 import "xterm/css/xterm.css";
 
-const TerminalPane = ({ terminalOutput, onUserInput }) => {
+const TerminalPane = forwardRef(({ terminalOutput, onUserInput }, ref) => {
   const terminalRef = useRef(null);
   const termInstance = useRef(null);
+  const fitAddon = useRef(null);  // store fitAddon in a ref
   const [inputBuffer, setInputBuffer] = useState("");
   const prevTerminalOutput = useRef("");
+
+  // Expose a method to the parent that forces a refit
+  useImperativeHandle(ref, () => ({
+    resizeTerminal: () => {
+      if (fitAddon.current) {
+        fitAddon.current.fit();
+      }
+    },
+  }));
 
   useEffect(() => {
     // Initialize xterm.js
     termInstance.current = new XTerminal({
       cursorBlink: true,
       convertEol: true,
+      // wordWrap: true, // optional if you want line-wrapping
+      // scrollback: 1000, // default is 1000, can be changed
     });
+
+    // Load the FitAddon
+    fitAddon.current = new FitAddon();
+    termInstance.current.loadAddon(fitAddon.current);
+
+    // Open the terminal in the div
     termInstance.current.open(terminalRef.current);
+
+    // Perform initial fit
+    fitAddon.current.fit();
+
     // Write initial external output
     termInstance.current.write(terminalOutput + "\r\n> ");
     prevTerminalOutput.current = terminalOutput;
@@ -42,7 +65,7 @@ const TerminalPane = ({ terminalOutput, onUserInput }) => {
 
     return () => {
       disposeData.dispose();
-      termInstance.current.dispose();
+      termInstance.current?.dispose();
     };
   }, [onUserInput, terminalOutput]);
 
@@ -62,13 +85,13 @@ const TerminalPane = ({ terminalOutput, onUserInput }) => {
       style={{
         width: "100%",
         height: "100%",
-        // background is transparent so it matches the parent
+        paddingBottom: "20px",
         background: "transparent",
         color: "#0f0",
         boxSizing: "border-box",
       }}
     />
   );
-};
+});
 
 export default TerminalPane;

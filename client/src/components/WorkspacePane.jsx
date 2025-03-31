@@ -15,7 +15,8 @@ function textToDomPolyfill(xmlText) {
 export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange }) {
   const blocklyDiv = useRef(null);
   const workspaceRef = useRef(null);
-  const lastXmlRef = useRef("");
+  const lastJsonRef = useRef("");
+  const debounceTimeout = useRef(null);
 
   const updateCode = useCallback(() => {
     if (workspaceRef.current && javascriptGenerator.workspaceToCode) {
@@ -23,15 +24,18 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange }) {
       console.log("WorkspacePane: Generated Code:", code);
       setGeneratedCode(code);
     } else {
-      console.error("Code generation is not available.");
+      console.error("Code generation not available.");
     }
     if (onWorkspaceChange && workspaceRef.current) {
-      const xmlDom = Blockly.Xml.workspaceToDom(workspaceRef.current);
-      const xmlText = Blockly.Xml.domToText(xmlDom);
-      // Only update if the XML has changed
-      if (xmlText !== lastXmlRef.current) {
-        lastXmlRef.current = xmlText;
-        onWorkspaceChange(xmlText);
+      // Use JSON serialization (works in newer versions of Blockly)
+      const workspaceJson = Blockly.serialization.workspaces.save(workspaceRef.current);
+      const jsonText = JSON.stringify(workspaceJson);
+      if (jsonText !== lastJsonRef.current) {
+        lastJsonRef.current = jsonText;
+        if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+        debounceTimeout.current = setTimeout(() => {
+          onWorkspaceChange(jsonText);
+        }, 500);
       }
     }
   }, [setGeneratedCode, onWorkspaceChange]);
