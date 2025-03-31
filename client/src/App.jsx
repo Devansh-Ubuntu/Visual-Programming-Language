@@ -1,6 +1,8 @@
 import React, { useRef, useState, useEffect } from "react";
 import Header from "./components/Header";
 import MainLayout from "./layouts/MainLayout";
+import * as Blockly from "blockly"; // ✅ Fix: Import everything as Blockly
+
 import JSInterpreterRunner from "./components/JSInterpreterRunner";
 import { saveWorkspace } from "./components/SaveWorkspace";
 import { loadWorkspace } from "./components/LoadWorkspace";
@@ -12,7 +14,20 @@ function App() {
   const [terminalWidth, setTerminalWidth] = useState(300);
   const [workspaceState, setWorkspaceState] = useState(null);
   const interpreterRef = useRef(null);
+  const workspaceRef = useRef(null);
 
+  useEffect(() => {
+    // ✅ Inject Blockly into the workspace
+    const workspace = Blockly.inject("blocklyDiv", {
+        toolbox: document.getElementById("toolbox"), // Ensure you have a toolbox
+    });
+
+    workspaceRef.current = workspace; // ✅ Store workspace reference
+
+    console.log("✅ Blockly workspace initialized!");
+
+    return () => workspace.dispose(); // Cleanup on unmount
+}, []);
   useEffect(() => {
     console.log("Generated code updated:", generatedCode);
   }, [generatedCode]);
@@ -46,12 +61,23 @@ function App() {
 
   // Save workspace state to local file.
   const handleSave = () => {
-    // Convert your Blockly workspace to XML
-    const xmlDom = Blockly.Xml.workspaceToDom(workspaceRef.current);
-    const xmlText = Blockly.Xml.domToText(xmlDom);
-    // Save the XML text
-    saveWorkspace(xmlText);
-  };
+    if (!workspaceRef.current) {
+        console.error("❌ Error: workspaceRef is null or not initialized.");
+        return;
+    }
+
+    try {
+        const xmlDom = Blockly.Xml.workspaceToDom(workspaceRef.current);
+        const xmlText = Blockly.Xml.domToText(xmlDom);
+        
+        console.log("✅ XML Data:", xmlText); // Debugging: Check if XML data is valid
+
+        saveWorkspace(xmlText);
+    } catch (error) {
+        console.error("❌ Error saving workspace:", error);
+    }
+};
+
 
   // Load workspace state from local file.
   const handleLoad = () => {
