@@ -1,4 +1,4 @@
-   {
+{
   "name": "my-visual-lang-project",
   "private": true,
   "scripts": {
@@ -11,12 +11,14 @@
     "concurrently": "^7.6.0"
   },
   "dependencies": {
+    "acorn": "^8.14.1",
     "blockly": "^11.2.2",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-rnd": "^10.5.2",
-    "xterm": "^5.3.0"
+    "xterm": "^5.3.0",
+    "xterm-addon-fit": "^0.8.0"
   }
 }
