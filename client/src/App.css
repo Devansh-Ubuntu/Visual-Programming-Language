@@ -70,3 +70,8 @@ html, body, #root {
 .split-vertical > .gutter {
   cursor: row-resize;
 }
+
+.blocklyWidgetDiv {
+  background: transparent !important;
+  box-shadow: none !important;
+}
