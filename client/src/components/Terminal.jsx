@@ -1,20 +1,27 @@
-// src/components/Terminal.jsx
 import React, { useEffect, useRef } from "react";
 import { Terminal as XTerminal } from "xterm";
+import { FitAddon } from "xterm-addon-fit";
 import "xterm/css/xterm.css";
 
 const Terminal = ({ output }) => {
   const terminalRef = useRef(null);
   const termInstance = useRef(null);
+  const fitAddon = useRef(null);
 
   useEffect(() => {
-    // Initialize the xterm.js terminal
+    // Initialize the xterm.js terminal and load the Fit Addon.
     termInstance.current = new XTerminal({
       cursorBlink: true,
       convertEol: true,
     });
+    fitAddon.current = new FitAddon();
+    termInstance.current.loadAddon(fitAddon.current);
+
+    // Open the terminal and fit it to the container.
     termInstance.current.open(terminalRef.current);
-    // Write initial output if any
+    fitAddon.current.fit();
+
+    // Write initial output.
     termInstance.current.write(output);
     return () => {
       termInstance.current.dispose();

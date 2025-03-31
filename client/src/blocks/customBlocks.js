@@ -1,3 +1,4 @@
+//src/blocks/customBlocks.js
 import * as Blockly from 'blockly';
 
 Blockly.Blocks['event_trigger'] = {
