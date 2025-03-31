@@ -1,11 +1,25 @@
+// src/components/WorkspacePane.jsx
 import React, { useEffect, useRef, useCallback } from "react";
 import * as Blockly from "blockly/core";
 import * as libraryBlocks from "blockly/blocks";
 import { javascriptGenerator } from "blockly/javascript";
 import * as En from "blockly/msg/en";
-import toolbox from "./Toolbox.jsx";
+import toolbox from "./dynamicToolbox";
 
 Blockly.setLocale(En);
+
+// Override the dropdown's onHide method to ensure cleanup
+if (Blockly.FieldDropdown && Blockly.FieldDropdown.prototype) {
+  const originalOnHide = Blockly.FieldDropdown.prototype.onHide;
+  Blockly.FieldDropdown.prototype.onHide = function() {
+    if (Blockly.WidgetDiv && Blockly.WidgetDiv.isVisible()) {
+      Blockly.WidgetDiv.hide();
+    }
+    if (originalOnHide) {
+      originalOnHide.call(this);
+    }
+  };
+}
 
 function textToDomPolyfill(xmlText) {
   const parser = new DOMParser();
@@ -27,27 +41,40 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange }) {
       console.error("Code generation not available.");
     }
     if (onWorkspaceChange && workspaceRef.current) {
-      // Use JSON serialization (works in newer versions of Blockly)
-      const workspaceJson = Blockly.serialization.workspaces.save(workspaceRef.current);
-      const jsonText = JSON.stringify(workspaceJson);
-      if (jsonText !== lastJsonRef.current) {
-        lastJsonRef.current = jsonText;
-        if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
-        debounceTimeout.current = setTimeout(() => {
-          onWorkspaceChange(jsonText);
-        }, 500);
+      const xmlDom = Blockly.Xml.workspaceToDom(workspaceRef.current);
+      const xmlText = Blockly.Xml.domToText(xmlDom);
+      if (xmlText !== lastXmlRef.current) {
+        lastXmlRef.current = xmlText;
+        onWorkspaceChange(xmlText);
       }
     }
   }, [setGeneratedCode, onWorkspaceChange]);
 
   useEffect(() => {
     if (blocklyDiv.current) {
+      // Inject Blockly workspace
       workspaceRef.current = Blockly.inject(blocklyDiv.current, {
         toolbox: toolbox,
         trashcan: true,
         scrollbars: true,
       });
 
+      // Combined change listener: update code and hide stray widgets
+      const combinedListener = function(event) {
+        // If a field (like dropdown) changes, hide any stray widget
+        if (event.type === Blockly.Events.CHANGE && event.element === 'field') {
+          Blockly.hideChaff(true);
+          if (Blockly.WidgetDiv && Blockly.WidgetDiv.isVisible()) {
+            Blockly.WidgetDiv.hide();
+          }
+        }
+        // Always update the code after any event.
+        updateCode();
+      };
+
+      workspaceRef.current.addChangeListener(combinedListener);
+
+      // Load default block if workspace is empty
       if (workspaceRef.current.getAllBlocks().length === 0) {
         const defaultXML = `
           <xml>
@@ -60,17 +87,16 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange }) {
             </block>
           </xml>
         `;
-        const xmlDom = Blockly.Xml.textToDom
-          ? Blockly.Xml.textToDom(defaultXML)
-          : textToDomPolyfill(defaultXML);
+        const xmlDom = Blockly.Xml.textToDom ? Blockly.Xml.textToDom(defaultXML) : textToDomPolyfill(defaultXML);
         Blockly.Xml.domToWorkspace(xmlDom, workspaceRef.current);
       }
 
-      workspaceRef.current.addChangeListener(updateCode);
+      // Initial code update
       updateCode();
 
+      // Cleanup on unmount
       return () => {
-        workspaceRef.current.removeChangeListener(updateCode);
+        workspaceRef.current.removeChangeListener(combinedListener);
         workspaceRef.current.dispose();
       };
     }

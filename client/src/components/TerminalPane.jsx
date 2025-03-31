@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import { Terminal as XTerminal } from "xterm";
-import { FitAddon } from "xterm-addon-fit";  // <-- Import FitAddon
+import { FitAddon } from "xterm-addon-fit";
 import "xterm/css/xterm.css";
 
 const TerminalPane = forwardRef(({ terminalOutput, onUserInput }, ref) => {
   const terminalRef = useRef(null);
   const termInstance = useRef(null);
-  const fitAddon = useRef(null);  // store fitAddon in a ref
+  const fitAddon = useRef(null);
   const [inputBuffer, setInputBuffer] = useState("");
   const prevTerminalOutput = useRef("");
 
@@ -20,56 +20,60 @@ const TerminalPane = forwardRef(({ terminalOutput, onUserInput }, ref) => {
   }));
 
   useEffect(() => {
-    // Initialize xterm.js
+    // Initialize xterm.js terminal and load the Fit Addon.
     termInstance.current = new XTerminal({
       cursorBlink: true,
       convertEol: true,
-      // wordWrap: true, // optional if you want line-wrapping
-      // scrollback: 1000, // default is 1000, can be changed
     });
-
-    // Load the FitAddon
     fitAddon.current = new FitAddon();
     termInstance.current.loadAddon(fitAddon.current);
 
-    // Open the terminal in the div
+    // Open terminal only after container is mounted.
     termInstance.current.open(terminalRef.current);
-
-    // Perform initial fit
+    // Force a fit to ensure proper dimensions.
     fitAddon.current.fit();
 
-    // Write initial external output
+    // Write initial output and prompt.
     termInstance.current.write(terminalOutput + "\r\n> ");
     prevTerminalOutput.current = terminalOutput;
 
-    // Listen for keystrokes
+    // Listen for keystrokes.
     const disposeData = termInstance.current.onData((data) => {
       if (data === "\r") {
-        // Enter key
+        // Enter key.
         termInstance.current.write("\r\n");
         if (onUserInput) onUserInput(inputBuffer);
         setInputBuffer("");
         termInstance.current.write("> ");
       } else if (data === "\u007F") {
-        // Backspace
+        // Backspace.
         if (inputBuffer.length > 0) {
           setInputBuffer((prev) => prev.slice(0, -1));
           termInstance.current.write("\b \b");
         }
       } else {
-        // Normal character
+        // Normal character.
         setInputBuffer((prev) => prev + data);
         termInstance.current.write(data);
       }
     });
 
+    // Optional: Re-fit terminal on window resize.
+    const handleResize = () => {
+      if (fitAddon.current) {
+        fitAddon.current.fit();
+      }
+    };
+    window.addEventListener("resize", handleResize);
+
     return () => {
+      window.removeEventListener("resize", handleResize);
       disposeData.dispose();
       termInstance.current?.dispose();
     };
   }, [onUserInput, terminalOutput]);
 
-  // Whenever external output changes, append only new content
+  // Append external output when it changes.
   useEffect(() => {
     if (!termInstance.current) return;
     const newContent = terminalOutput.slice(prevTerminalOutput.current.length);
@@ -85,7 +89,6 @@ const TerminalPane = forwardRef(({ terminalOutput, onUserInput }, ref) => {
       style={{
         width: "100%",
         height: "100%",
-        paddingBottom: "20px",
         background: "transparent",
         color: "#0f0",
         boxSizing: "border-box",
