@@ -36,7 +36,7 @@ const toolbox = {
     },
     {
       kind: "category",
-      name: "Text",
+      name: "String",
       colour: "%{BKY_TEXTS_HUE}",
       contents: [
         { kind: "block", type: "text" },
