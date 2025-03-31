@@ -1,5 +1,5 @@
-// src/components/JSInterpreterRunner.jsx
 import React, { useImperativeHandle, forwardRef } from "react";
+import Interpreter from "js-interpreter"; // Import the npm package
 
 const JSInterpreterRunner = forwardRef(({ code, setTerminalOutput }, ref) => {
   useImperativeHandle(
@@ -16,11 +16,14 @@ const JSInterpreterRunner = forwardRef(({ code, setTerminalOutput }, ref) => {
           setTerminalOutput("");
           stopRequested = false;
           try {
-            const interpreter = new window.Interpreter(code, (interpreter, scope) => {
+            const interpreter = new Interpreter(code, (interpreter, scope) => {
+              // Create a native function for console.log
               const logFn = interpreter.createNativeFunction((text) => {
                 setTerminalOutput((prev) => prev + text.toString() + "\n");
               });
               interpreter.setProperty(scope, "console", { log: logFn });
+              
+              // Create a native function for alert
               const alertFn = interpreter.createNativeFunction((text) => {
                 setTerminalOutput((prev) => prev + text.toString() + "\n");
               });
