@@ -4,22 +4,9 @@ import * as Blockly from "blockly/core";
 import * as libraryBlocks from "blockly/blocks";
 import { javascriptGenerator } from "blockly/javascript";
 import * as En from "blockly/msg/en";
-import toolbox from "./dynamicToolbox";
+import toolbox from "./hybridToolbox";
 
 Blockly.setLocale(En);
-
-// Override the dropdown's onHide method to ensure cleanup
-if (Blockly.FieldDropdown && Blockly.FieldDropdown.prototype) {
-  const originalOnHide = Blockly.FieldDropdown.prototype.onHide;
-  Blockly.FieldDropdown.prototype.onHide = function() {
-    if (Blockly.WidgetDiv && Blockly.WidgetDiv.isVisible()) {
-      Blockly.WidgetDiv.hide();
-    }
-    if (originalOnHide) {
-      originalOnHide.call(this);
-    }
-  };
-}
 
 function textToDomPolyfill(xmlText) {
   const parser = new DOMParser();

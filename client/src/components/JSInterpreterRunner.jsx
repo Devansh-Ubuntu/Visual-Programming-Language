@@ -1,5 +1,5 @@
 import React, { useImperativeHandle, forwardRef } from "react";
-import Interpreter from "js-interpreter"; // Import the npm package
+import Interpreter from "js-interpreter";
 
 const JSInterpreterRunner = forwardRef(({ code, setTerminalOutput }, ref) => {
   useImperativeHandle(
