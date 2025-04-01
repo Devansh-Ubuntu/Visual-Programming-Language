@@ -2,111 +2,111 @@ import * as Blockly from "blockly/core";
 
 // Explicit block definitions with tooltips
 // (If these blocks are not already defined elsewhere, they will be registered here.)
-Blockly.Blocks["controls_if"] = {
-  init() {
-    this.jsonInit({
-      message0: "if %1 then %2",
-      args0: [
-        { type: "input_value", name: "IF0", check: "Boolean" },
-        { type: "input_statement", name: "DO0" }
-      ],
-      previousStatement: null,
-      nextStatement: null,
-      colour: "%{BKY_LOGIC_HUE}",
-      tooltip: "If condition is true, then do statements.",
-      helpUrl: ""
-    });
-  }
-};
+// Blockly.Blocks["controls_if"] = {
+//   init() {
+//     this.jsonInit({
+//       message0: "if %1 then %2",
+//       args0: [
+//         { type: "input_value", name: "IF0", check: "Boolean" },
+//         { type: "input_statement", name: "DO0" }
+//       ],
+//       previousStatement: null,
+//       nextStatement: null,
+//       colour: "%{BKY_LOGIC_HUE}",
+//       tooltip: "If condition is true, then do statements.",
+//       helpUrl: ""
+//     });
+//   }
+// };
 
-Blockly.Blocks["logic_compare"] = {
-  init() {
-    this.jsonInit({
-      message0: "%1 %2 %3",
-      args0: [
-        { type: "input_value", name: "A" },
-        {
-          type: "field_dropdown",
-          name: "OP",
-          options: [
-            ["=", "EQ"],
-            ["\u2260", "NEQ"],
-            ["<", "LT"],
-            ["\u2264", "LTE"],
-            [">", "GT"],
-            ["\u2265", "GTE"]
-          ]
-        },
-        { type: "input_value", name: "B" }
-      ],
-      inputsInline: true,
-      output: "Boolean",
-      colour: "%{BKY_LOGIC_HUE}",
-      tooltip: "Compare two values.",
-      helpUrl: ""
-    });
-  }
-};
+// Blockly.Blocks["logic_compare"] = {
+//   init() {
+//     this.jsonInit({
+//       message0: "%1 %2 %3",
+//       args0: [
+//         { type: "input_value", name: "A" },
+//         {
+//           type: "field_dropdown",
+//           name: "OP",
+//           options: [
+//             ["=", "EQ"],
+//             ["\u2260", "NEQ"],
+//             ["<", "LT"],
+//             ["\u2264", "LTE"],
+//             [">", "GT"],
+//             ["\u2265", "GTE"]
+//           ]
+//         },
+//         { type: "input_value", name: "B" }
+//       ],
+//       inputsInline: true,
+//       output: "Boolean",
+//       colour: "%{BKY_LOGIC_HUE}",
+//       tooltip: "Compare two values.",
+//       helpUrl: ""
+//     });
+//   }
+// };
 
-Blockly.Blocks["logic_operation"] = {
-  init() {
-    this.jsonInit({
-      message0: "%1 %2 %3",
-      args0: [
-        { type: "input_value", name: "A", check: "Boolean" },
-        {
-          type: "field_dropdown",
-          name: "OP",
-          options: [
-            ["and", "AND"],
-            ["or", "OR"]
-          ]
-        },
-        { type: "input_value", name: "B", check: "Boolean" }
-      ],
-      inputsInline: true,
-      output: "Boolean",
-      colour: "%{BKY_LOGIC_HUE}",
-      tooltip: "Logical operation on two booleans.",
-      helpUrl: ""
-    });
-  }
-};
+// Blockly.Blocks["logic_operation"] = {
+//   init() {
+//     this.jsonInit({
+//       message0: "%1 %2 %3",
+//       args0: [
+//         { type: "input_value", name: "A", check: "Boolean" },
+//         {
+//           type: "field_dropdown",
+//           name: "OP",
+//           options: [
+//             ["and", "AND"],
+//             ["or", "OR"]
+//           ]
+//         },
+//         { type: "input_value", name: "B", check: "Boolean" }
+//       ],
+//       inputsInline: true,
+//       output: "Boolean",
+//       colour: "%{BKY_LOGIC_HUE}",
+//       tooltip: "Logical operation on two booleans.",
+//       helpUrl: ""
+//     });
+//   }
+// };
 
-Blockly.Blocks["logic_boolean"] = {
-  init() {
-    this.jsonInit({
-      message0: "%1",
-      args0: [
-        {
-          type: "field_dropdown",
-          name: "BOOL",
-          options: [
-            ["true", "TRUE"],
-            ["false", "FALSE"]
-          ]
-        }
-      ],
-      output: "Boolean",
-      colour: "%{BKY_LOGIC_HUE}",
-      tooltip: "Boolean value: true or false.",
-      helpUrl: ""
-    });
-  }
-};
+// Blockly.Blocks["logic_boolean"] = {
+//   init() {
+//     this.jsonInit({
+//       message0: "%1",
+//       args0: [
+//         {
+//           type: "field_dropdown",
+//           name: "BOOL",
+//           options: [
+//             ["true", "TRUE"],
+//             ["false", "FALSE"]
+//           ]
+//         }
+//       ],
+//       output: "Boolean",
+//       colour: "%{BKY_LOGIC_HUE}",
+//       tooltip: "Boolean value: true or false.",
+//       helpUrl: ""
+//     });
+//   }
+// };
 
-Blockly.Blocks["logic_negate"] = {
-  init() {
-    this.jsonInit({
-      message0: "not %1",
-      args0: [{ type: "input_value", name: "BOOL", check: "Boolean" }],
-      output: "Boolean",
-      colour: "%{BKY_LOGIC_HUE}",
-      tooltip: "Logical negation.",
-      helpUrl: ""
-    });
-  }
-};
+// Blockly.Blocks["logic_negate"] = {
+//   init() {
+//     this.jsonInit({
+//       message0: "not %1",
+//       args0: [{ type: "input_value", name: "BOOL", check: "Boolean" }],
+//       output: "Boolean",
+//       colour: "%{BKY_LOGIC_HUE}",
+//       tooltip: "Logical negation.",
+//       helpUrl: ""
+//     });
+//   }
+// };
 
 // Additional blocks can be defined in a similar fashion.
 // For brevity, only a few key blocks are explicitly defined here.
@@ -241,5 +241,4 @@ if (extras.length) {
   });
 }
 
-console.log("Hybrid Toolbox:", toolbox);
 export default toolbox;

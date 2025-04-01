@@ -38,7 +38,6 @@ function generateDynamicToolbox() {
     })
   };
 
-  console.log("Generated Toolbox:", toolboxConfig);
   return toolboxConfig;
 }
 

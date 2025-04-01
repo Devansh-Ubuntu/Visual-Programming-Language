@@ -1,4 +1,5 @@
-// src/components/Toolbox.jsx
+import * as Blockly from "blockly/core";
+
 const toolbox = {
   kind: "categoryToolbox",
   contents: [
@@ -20,7 +21,10 @@ const toolbox = {
       colour: "%{BKY_LOOPS_HUE}",
       contents: [
         { kind: "block", type: "controls_repeat_ext" },
-        { kind: "block", type: "controls_whileUntil" }
+        { kind: "block", type: "controls_whileUntil" },
+        { kind: "block", type: "controls_for" },
+        { kind: "block", type: "controls_forEach" },
+        { kind: "block", type: "controls_flow_statements" }
       ]
     },
     {
@@ -31,7 +35,12 @@ const toolbox = {
         { kind: "block", type: "math_number" },
         { kind: "block", type: "math_arithmetic" },
         { kind: "block", type: "math_single" },
-        { kind: "block", type: "math_trig" }
+        { kind: "block", type: "math_trig" },
+        { kind: "block", type: "math_round" },
+        { kind: "block", type: "math_modulo" },
+        { kind: "block", type: "math_random_int" },
+        { kind: "block", type: "math_random_float" },
+        { kind: "block", type: "math_constrain" }
       ]
     },
     {
@@ -40,7 +49,35 @@ const toolbox = {
       colour: "%{BKY_TEXTS_HUE}",
       contents: [
         { kind: "block", type: "text" },
-        { kind: "block", type: "text_print" }
+        { kind: "block", type: "text_print" },
+        { kind: "block", type: "text_join" },
+        { kind: "block", type: "text_length" },
+        { kind: "block", type: "text_isEmpty" },
+        { kind: "block", type: "text_indexOf" },
+        { kind: "block", type: "text_charAt" },
+        { kind: "block", type: "text_getSubstring" },
+        { kind: "block", type: "text_changeCase" },
+        { kind: "block", type: "text_trim" },
+        { kind: "block", type: "text_prompt" }
+      ]
+    },
+    {
+      kind: "category",
+      name: "Lists",
+      colour: "%{BKY_LISTS_HUE}",
+      contents: [
+        { kind: "block", type: "lists_create_empty" },
+        { kind: "block", type: "lists_create_with" },
+        { kind: "block", type: "lists_repeat" },
+        { kind: "block", type: "lists_length" },
+        { kind: "block", type: "lists_isEmpty" },
+        { kind: "block", type: "lists_indexOf" },
+        { kind: "block", type: "lists_getIndex" },
+        { kind: "block", type: "lists_setIndex" },
+        { kind: "block", type: "lists_getSublist" },
+        { kind: "block", type: "lists_sort" },
+        { kind: "block", type: "lists_split" },
+        { kind: "block", type: "lists_reverse" }
       ]
     },
     {
@@ -57,5 +94,37 @@ const toolbox = {
     }
   ]
 };
+
+// Dynamic fallback: any block not already in the static toolbox
+const staticTypes = new Set();
+toolbox.contents.forEach(cat => {
+  if (cat.contents) {
+    cat.contents.forEach(block => staticTypes.add(block.type));
+  }
+});
+
+const extras = [];
+Object.keys(Blockly.Blocks).forEach(type => {
+  if (!staticTypes.has(type)) {
+    // Only include blocks that follow known naming conventions
+    if (
+      type.startsWith("logic_") ||
+      type.startsWith("controls_") ||
+      type.startsWith("math_") ||
+      type.startsWith("text_") ||
+      type.startsWith("lists_")
+    ) {
+      extras.push({ kind: "block", type });
+    }
+  }
+});
+if (extras.length) {
+  toolbox.contents.push({
+    kind: "category",
+    name: "Extras",
+    colour: "#999999",
+    contents: extras
+  });
+}
 
 export default toolbox;

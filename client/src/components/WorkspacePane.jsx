@@ -4,7 +4,7 @@ import * as Blockly from "blockly/core";
 import * as libraryBlocks from "blockly/blocks";
 import { javascriptGenerator } from "blockly/javascript";
 import * as En from "blockly/msg/en";
-import toolbox from "./hybridToolbox";
+import toolbox from "./Toolbox";
 
 Blockly.setLocale(En);
 

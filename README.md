@@ -3,7 +3,7 @@
 plan
 
 1) Terminal, faster and dynamic resize and floating and docking
-2) add blocks : 
+2) add blocks :
    1) delay blocks
    2) motion blocks
    3) say blocks
@@ -16,7 +16,3 @@ terminal docking workspace adjust
 list indexed as 1 not zero
 
 finishing touch and workspace enable
-
-done:
-stop button
-save and load
