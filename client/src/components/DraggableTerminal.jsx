@@ -1,14 +1,20 @@
-import React, { useState, useRef } from "react";
+// src/components/DraggableTerminal.jsx
+import React, { useState } from "react";
 import { Rnd } from "react-rnd";
 
-export default function DraggableTerminal({ terminalOutput, onUserInput, onDockChange, children }) {
+export default function DraggableTerminal({
+  terminalOutput,
+  onUserInput,
+  onDockChange,
+  terminalPaneRef,
+  children,
+}) {
   const defaultFloating = { x: 200, y: 200, width: 500, height: 300 };
   const [floatingPosition, setFloatingPosition] = useState({ x: defaultFloating.x, y: defaultFloating.y });
   const [floatingSize, setFloatingSize] = useState({ width: defaultFloating.width, height: defaultFloating.height });
   const [position, setPosition] = useState({ x: defaultFloating.x, y: defaultFloating.y });
   const [size, setSize] = useState({ width: defaultFloating.width, height: defaultFloating.height });
   const [isDocked, setIsDocked] = useState(false);
-  const terminalPaneRef = useRef(null);
 
   const snapThreshold = 40;
   const undockMovementThreshold = 50;
@@ -45,7 +51,7 @@ export default function DraggableTerminal({ terminalOutput, onUserInput, onDockC
       return;
     }
 
-    // Docking
+    // Docking logic.
     setFloatingPosition({ x: newX, y: newY });
     setFloatingSize({ width: size.width, height: size.height });
     if (minDist === distToLeft) {
@@ -78,7 +84,7 @@ export default function DraggableTerminal({ terminalOutput, onUserInput, onDockC
       setFloatingPosition({ x: pos.x, y: pos.y });
     }
     setTimeout(() => {
-      terminalPaneRef.current?.resizeTerminal();
+      terminalPaneRef?.current?.resizeTerminal();
     }, 0);
   };
 
@@ -114,7 +120,6 @@ export default function DraggableTerminal({ terminalOutput, onUserInput, onDockC
       >
         Terminal
       </div>
-      {/* Always render children; remove fallback TerminalPane */}
       {children}
     </Rnd>
   );

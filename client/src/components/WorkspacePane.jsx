@@ -38,29 +38,27 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange }) {
 
   useEffect(() => {
     if (blocklyDiv.current) {
-      // Inject Blockly workspace
+      // Inject Blockly workspace.
       workspaceRef.current = Blockly.inject(blocklyDiv.current, {
         toolbox: toolbox,
         trashcan: true,
         scrollbars: true,
       });
 
-      // Combined change listener: update code and hide stray widgets
+      // Combined change listener.
       const combinedListener = function(event) {
-        // If a field (like dropdown) changes, hide any stray widget
         if (event.type === Blockly.Events.CHANGE && event.element === 'field') {
           Blockly.hideChaff(true);
           if (Blockly.WidgetDiv && Blockly.WidgetDiv.isVisible()) {
             Blockly.WidgetDiv.hide();
           }
         }
-        // Always update the code after any event.
         updateCode();
       };
 
       workspaceRef.current.addChangeListener(combinedListener);
 
-      // Load default block if workspace is empty
+      // Load default block if workspace is empty.
       if (workspaceRef.current.getAllBlocks().length === 0) {
         const defaultXML = `
           <xml>
@@ -77,10 +75,10 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange }) {
         Blockly.Xml.domToWorkspace(xmlDom, workspaceRef.current);
       }
 
-      // Initial code update
+      // Initial code update.
       updateCode();
 
-      // Cleanup on unmount
+      // Cleanup on unmount.
       return () => {
         workspaceRef.current.removeChangeListener(combinedListener);
         workspaceRef.current.dispose();

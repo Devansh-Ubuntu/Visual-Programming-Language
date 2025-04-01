@@ -20,7 +20,7 @@ export const saveWorkspace = (workspaceData, filename = "workspace.xml") => {
 
     // Free memory after a short delay
     setTimeout(() => URL.revokeObjectURL(url), 100);
-    console.log(`Workspace saved successfully as '${filename}'`);
+    console.log(` Workspace saved successfully as '${filename}'`);
   } catch (err) {
     console.error(" Error saving workspace:", err);
   }

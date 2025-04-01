@@ -1,3 +1,4 @@
+// src/components/TerminalPane.jsx
 import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import { Terminal as XTerminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
@@ -10,7 +11,7 @@ const TerminalPane = forwardRef(({ terminalOutput, onUserInput }, ref) => {
   const [inputBuffer, setInputBuffer] = useState("");
   const prevTerminalOutput = useRef("");
 
-  // Expose a method to the parent that forces a refit
+  // Expose a method to force a refit.
   useImperativeHandle(ref, () => ({
     resizeTerminal: () => {
       if (fitAddon.current) {
@@ -20,45 +21,41 @@ const TerminalPane = forwardRef(({ terminalOutput, onUserInput }, ref) => {
   }));
 
   useEffect(() => {
-    // Initialize xterm.js terminal and load the Fit Addon.
+    // Initialize xterm.js terminal.
     termInstance.current = new XTerminal({
       cursorBlink: true,
       convertEol: true,
     });
     fitAddon.current = new FitAddon();
     termInstance.current.loadAddon(fitAddon.current);
-
-    // Open terminal only after container is mounted.
     termInstance.current.open(terminalRef.current);
-    // Force a fit to ensure proper dimensions.
     fitAddon.current.fit();
 
     // Write initial output and prompt.
     termInstance.current.write(terminalOutput + "\r\n> ");
     prevTerminalOutput.current = terminalOutput;
 
-    // Listen for keystrokes.
+    // Listen for user keystrokes.
     const disposeData = termInstance.current.onData((data) => {
       if (data === "\r") {
-        // Enter key.
+        // On Enter.
         termInstance.current.write("\r\n");
         if (onUserInput) onUserInput(inputBuffer);
         setInputBuffer("");
         termInstance.current.write("> ");
       } else if (data === "\u007F") {
-        // Backspace.
+        // On Backspace.
         if (inputBuffer.length > 0) {
           setInputBuffer((prev) => prev.slice(0, -1));
           termInstance.current.write("\b \b");
         }
       } else {
-        // Normal character.
+        // Regular character.
         setInputBuffer((prev) => prev + data);
         termInstance.current.write(data);
       }
     });
 
-    // Optional: Re-fit terminal on window resize.
     const handleResize = () => {
       if (fitAddon.current) {
         fitAddon.current.fit();
