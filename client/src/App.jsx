@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import Header from "./components/Header";
 import MainLayout from "./layouts/MainLayout";
-import * as Blockly from "blockly"; // ✅ Import everything as Blockly
+import * as Blockly from "blockly";
 import JSInterpreterRunner from "./components/JSInterpreterRunner";
 import { saveWorkspace } from "./components/SaveWorkspace";
 import { loadWorkspace } from "./components/LoadWorkspace";
