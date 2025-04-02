@@ -1,4 +1,3 @@
-// src/components/JSInterpreterRunner.jsx
 import React, { useImperativeHandle, forwardRef } from "react";
 import Interpreter from "js-interpreter";
 
@@ -6,7 +5,8 @@ const JSInterpreterRunner = forwardRef(({ code, setTerminalOutput }, ref) => {
   useImperativeHandle(
     ref,
     () => {
-      let stopRequested = false;
+      let stopRequested = false; // flag
+
       return {
         runCode() {
           if (!code || !code.trim()) {
@@ -17,13 +17,13 @@ const JSInterpreterRunner = forwardRef(({ code, setTerminalOutput }, ref) => {
           stopRequested = false;
           try {
             const interpreter = new Interpreter(code, (interpreter, scope) => {
-              // Native function for console.log.
+              // Create a native function for console.log
               const logFn = interpreter.createNativeFunction((text) => {
                 setTerminalOutput((prev) => prev + text.toString() + "\n");
               });
               interpreter.setProperty(scope, "console", { log: logFn });
               
-              // Native function for alert.
+              // Create a native function for alert
               const alertFn = interpreter.createNativeFunction((text) => {
                 setTerminalOutput((prev) => prev + text.toString() + "\n");
               });
@@ -46,7 +46,7 @@ const JSInterpreterRunner = forwardRef(({ code, setTerminalOutput }, ref) => {
         },
         stopCode() {
           stopRequested = true;
-        },
+        }
       };
     },
     [code, setTerminalOutput]
