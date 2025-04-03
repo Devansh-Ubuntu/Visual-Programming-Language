@@ -6,6 +6,10 @@ import { javascriptGenerator } from "blockly/javascript";
 import * as En from "blockly/msg/en";
 import toolbox from "./Toolbox";
 
+import "../blocks/customBlocks.js";
+import "../blocks/custom_generator.js";
+
+
 Blockly.setLocale(En);
 
 function textToDomPolyfill(xmlText) {

@@ -91,6 +91,17 @@ const toolbox = {
       name: "Procedures",
       colour: "%{BKY_PROCEDURES_HUE}",
       custom: "PROCEDURE"
+    },
+
+    {
+      kind: "category",
+      name: "Custom",
+      colour: "#FF6688",
+      contents: [
+        { kind: "block", type: "input_block" },
+        { kind: "block", type: "delay_block" },
+        { kind: "block", type: "get_list_element_safely" }
+      ]
     }
   ]
 };

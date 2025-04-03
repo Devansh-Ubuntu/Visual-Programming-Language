@@ -19,13 +19,13 @@ const JSInterpreterRunner = forwardRef(({ code, setTerminalOutput }, ref) => {
             const interpreter = new Interpreter(code, (interpreter, scope) => {
               // Create a native function for console.log
               const logFn = interpreter.createNativeFunction((text) => {
-                setTerminalOutput((prev) => prev + text.toString() + "\n");
+                setTerminalOutput((prev) => prev + String(text) + "\n");
               });
               interpreter.setProperty(scope, "console", { log: logFn });
               
               // Create a native function for alert
               const alertFn = interpreter.createNativeFunction((text) => {
-                setTerminalOutput((prev) => prev + text.toString() + "\n");
+                setTerminalOutput((prev) => prev + String(text) + "\n");
               });
               interpreter.setProperty(scope, "alert", alertFn);
             });

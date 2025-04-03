@@ -1,3 +1,4 @@
+//src/blocks/customBlocks.js
 import * as Blockly from "blockly/core";
 
 // Input Block
@@ -27,6 +28,24 @@ Blockly.Blocks["delay_block"] = {
     this.setHelpUrl("");
   },
 };
+
+Blockly.Blocks['get_list_element_safely'] = {
+  init: function() {
+      this.appendValueInput("LIST")
+          .setCheck("Array")
+          .appendField("Get element from list");
+      
+      this.appendValueInput("INDEX")
+          .setCheck("Number")
+          .appendField("at index");
+
+      this.setOutput(true, null);
+      this.setColour(230);
+      this.setTooltip("Gets an element from a list, but throws an error for negative or zero index.");
+      this.setHelpUrl("");
+  }
+};
+
 
 // Export the blocks so they can be imported in other files
 export { Blockly };
