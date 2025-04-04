@@ -5,14 +5,16 @@ import { javascriptGenerator } from "blockly/javascript";
 // --- Block Definitions ---
 
 // Input Block
+
+
+
 Blockly.Blocks["input_block"] = {
   init: function () {
     this.appendDummyInput()
-      .appendField("Enter input:")
-      .appendField(new Blockly.FieldTextInput(""), "INPUT_NAME");
+      .appendField("Enter input");
     this.setOutput(true, "String");
     this.setColour(230);
-    this.setTooltip("Gets user input as a string.");
+    this.setTooltip("Asks user for input from a prompt or terminal.");
     this.setHelpUrl("");
   },
 };
@@ -22,6 +24,7 @@ Blockly.Blocks["delay_block"] = {
   init: function () {
     this.appendDummyInput()
       .appendField("Delay for")
+      // Field name is "DELAY_TIME"
       .appendField(new Blockly.FieldNumber(1, 0, Infinity, 0.1), "DELAY_TIME")
       .appendField("seconds");
     this.setPreviousStatement(true, null);
@@ -31,7 +34,6 @@ Blockly.Blocks["delay_block"] = {
     this.setHelpUrl("");
   },
 };
-
 // Get List Element Safely Block
 Blockly.Blocks["get_list_element_safely"] = {
   init: function () {
@@ -54,16 +56,22 @@ Blockly.Blocks["get_list_element_safely"] = {
 // For Blockly 11.2.1, custom generators should be registered on javascriptGenerator.forBlock.
 
 // Generator for Input Block
+
+
+
 javascriptGenerator.forBlock["input_block"] = function(block) {
-  const textInput = block.getFieldValue("INPUT_NAME");
-  const code = '"' + textInput + '"';
-  return [code, javascriptGenerator.ORDER_ATOMIC];
+  // Generate code that calls getInput(), no 'await' keyword
+  const code = "getInput()";
+  // Return it as a value block
+  return [code, javascriptGenerator.ORDER_FUNCTION_CALL];
 };
 
 // Generator for Delay Block
-javascriptGenerator.forBlock["delay_block"] = function(block) {
-  const delayTime = block.getFieldValue("DELAY_TIME");
-  const code = `delay(${delayTime});\n`;
+javascriptGenerator.forBlock['delay_block'] = function(block) {
+  // IMPORTANT: Must match "DELAY_TIME" from the block definition
+  const delayTime = block.getFieldValue('DELAY_TIME') || 1;
+  // Multiply by 1000 to convert seconds to ms
+  const code = `delay(${delayTime * 1000});\n`;
   return code;
 };
 

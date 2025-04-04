@@ -11,7 +11,7 @@ const TerminalPane = forwardRef(({ terminalOutput, onUserInput }, ref) => {
   const [inputBuffer, setInputBuffer] = useState("");
   const prevTerminalOutput = useRef("");
 
-  // Expose a method to force a refit.
+  // Expose a method to force terminal refitting.
   useImperativeHandle(ref, () => ({
     resizeTerminal: () => {
       if (fitAddon.current) {
@@ -21,56 +21,56 @@ const TerminalPane = forwardRef(({ terminalOutput, onUserInput }, ref) => {
   }));
 
   useEffect(() => {
-    // Initialize xterm.js terminal.
+    // Initialize the xterm.js terminal.
     termInstance.current = new XTerminal({
       cursorBlink: true,
       convertEol: true,
+      fontFamily: "monospace",
+      fontSize: 14,
     });
     fitAddon.current = new FitAddon();
     termInstance.current.loadAddon(fitAddon.current);
     termInstance.current.open(terminalRef.current);
     fitAddon.current.fit();
 
-    // Write initial output and prompt.
+    // Write the initial output and prompt.
     termInstance.current.write(terminalOutput + "\r\n> ");
     prevTerminalOutput.current = terminalOutput;
 
-    // Listen for user keystrokes.
+    // Listen for keystrokes.
     const disposeData = termInstance.current.onData((data) => {
       if (data === "\r") {
-        // On Enter.
+        // On Enter: send input and clear buffer.
         termInstance.current.write("\r\n");
         if (onUserInput) onUserInput(inputBuffer);
         setInputBuffer("");
         termInstance.current.write("> ");
       } else if (data === "\u007F") {
-        // On Backspace.
+        // Handle Backspace.
         if (inputBuffer.length > 0) {
           setInputBuffer((prev) => prev.slice(0, -1));
           termInstance.current.write("\b \b");
         }
       } else {
-        // Regular character.
+        // Regular character input.
         setInputBuffer((prev) => prev + data);
         termInstance.current.write(data);
       }
     });
 
     const handleResize = () => {
-      if (fitAddon.current) {
-        fitAddon.current.fit();
-      }
+      if (fitAddon.current) fitAddon.current.fit();
     };
     window.addEventListener("resize", handleResize);
 
     return () => {
       window.removeEventListener("resize", handleResize);
       disposeData.dispose();
-      termInstance.current?.dispose();
+      termInstance.current.dispose();
     };
   }, [onUserInput, terminalOutput]);
 
-  // Append external output when it changes.
+  // Append any new external output.
   useEffect(() => {
     if (!termInstance.current) return;
     const newContent = terminalOutput.slice(prevTerminalOutput.current.length);
@@ -86,8 +86,9 @@ const TerminalPane = forwardRef(({ terminalOutput, onUserInput }, ref) => {
       style={{
         width: "100%",
         height: "100%",
-        background: "transparent",
+        background: "black",
         color: "#0f0",
+        padding: "8px",
         boxSizing: "border-box",
       }}
     />
