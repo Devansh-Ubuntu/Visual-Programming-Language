@@ -7,6 +7,9 @@ import * as En from "blockly/msg/en";
 import toolbox from "./Toolbox";
 import { initMascotBlocks } from "./mascot_block";
 
+// Import the merged custom blocks and generators file
+import "../blocks/customBlocksAndGenerators.js";
+
 Blockly.setLocale(En);
 
 function textToDomPolyfill(xmlText) {

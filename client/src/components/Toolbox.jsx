@@ -1,3 +1,4 @@
+// src/components/Toolbox.jsx
 import * as Blockly from "blockly/core";
 
 const toolbox = {
@@ -103,11 +104,21 @@ const toolbox = {
       name: "Procedures",
       colour: "%{BKY_PROCEDURES_HUE}",
       custom: "PROCEDURE"
+    },
+    {
+      kind: "category",
+      name: "Custom",
+      colour: "#FF6688",
+      contents: [
+        { kind: "block", type: "input_block" },
+        { kind: "block", type: "delay_block" },
+        { kind: "block", type: "get_list_element_safely" }
+      ]
     }
   ]
 };
 
-// Dynamic fallback: any block not already in the static toolbox
+// Dynamic fallback: add any extra blocks not already in the static toolbox.
 const staticTypes = new Set();
 toolbox.contents.forEach(cat => {
   if (cat.contents) {
@@ -118,7 +129,6 @@ toolbox.contents.forEach(cat => {
 const extras = [];
 Object.keys(Blockly.Blocks).forEach(type => {
   if (!staticTypes.has(type)) {
-    // Only include blocks that follow known naming conventions
     if (
       type.startsWith("logic_") ||
       type.startsWith("controls_") ||
