@@ -5,6 +5,18 @@ const toolbox = {
   contents: [
     {
       kind: "category",
+      name: "Mascot",
+      colour: "#5b80a5",  // Blue color for mascot category
+      contents: [
+        { kind: "block", type: "mascot_walk" },
+        { kind: "block", type: "mascot_flip" },
+        { kind: "block", type: "mascot_rotate" },
+        { kind: "block", type: "mascot_speak" },
+        { kind: "block", type: "mascot_reset" }
+      ]
+    },
+    {
+      kind: "category",
       name: "Logic",
       colour: "%{BKY_LOGIC_HUE}",
       contents: [

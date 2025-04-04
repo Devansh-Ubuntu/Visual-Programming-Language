@@ -5,6 +5,7 @@ import * as libraryBlocks from "blockly/blocks";
 import { javascriptGenerator } from "blockly/javascript";
 import * as En from "blockly/msg/en";
 import toolbox from "./Toolbox";
+import { initMascotBlocks } from "./mascot_block";
 
 Blockly.setLocale(En);
 
@@ -13,19 +14,37 @@ function textToDomPolyfill(xmlText) {
   return parser.parseFromString(xmlText, "text/xml").documentElement;
 }
 
-export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange }) {
+export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange, onMascotCommand }) {
   const blocklyDiv = useRef(null);
   const workspaceRef = useRef(null);
   const lastXmlRef = useRef("");
 
+  // Initialize mascot blocks
+  useEffect(() => {
+    initMascotBlocks();
+  }, []);
+
   const updateCode = useCallback(() => {
     if (workspaceRef.current && javascriptGenerator.workspaceToCode) {
       const code = javascriptGenerator.workspaceToCode(workspaceRef.current);
-      console.log("WorkspacePane: Generated Code:", code);
-      setGeneratedCode(code);
+      
+      // Add the mascotCommand function to the generated code
+      const wrappedCode = `
+        function mascotCommand(command) {
+          if (window.handleMascotCommand) {
+            window.handleMascotCommand(command);
+          }
+        }
+        
+        ${code}
+      `;
+      
+      console.log("WorkspacePane: Generated Code:", wrappedCode);
+      setGeneratedCode(wrappedCode);
     } else {
       console.error("Code generation is not available.");
     }
+    
     if (onWorkspaceChange && workspaceRef.current) {
       const xmlDom = Blockly.Xml.workspaceToDom(workspaceRef.current);
       const xmlText = Blockly.Xml.domToText(xmlDom);
@@ -36,16 +55,25 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange }) {
     }
   }, [setGeneratedCode, onWorkspaceChange]);
 
+  // Set up the mascot command handler
+  useEffect(() => {
+    if (onMascotCommand) {
+      window.handleMascotCommand = onMascotCommand;
+    }
+    
+    return () => {
+      delete window.handleMascotCommand;
+    };
+  }, [onMascotCommand]);
+
   useEffect(() => {
     if (blocklyDiv.current) {
-      // Inject Blockly workspace.
       workspaceRef.current = Blockly.inject(blocklyDiv.current, {
         toolbox: toolbox,
         trashcan: true,
         scrollbars: true,
       });
 
-      // Combined change listener.
       const combinedListener = function(event) {
         if (event.type === Blockly.Events.CHANGE && event.element === 'field') {
           Blockly.hideChaff(true);
@@ -58,7 +86,6 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange }) {
 
       workspaceRef.current.addChangeListener(combinedListener);
 
-      // Load default block if workspace is empty.
       if (workspaceRef.current.getAllBlocks().length === 0) {
         const defaultXML = `
           <xml>
@@ -75,10 +102,8 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange }) {
         Blockly.Xml.domToWorkspace(xmlDom, workspaceRef.current);
       }
 
-      // Initial code update.
       updateCode();
 
-      // Cleanup on unmount.
       return () => {
         workspaceRef.current.removeChangeListener(combinedListener);
         workspaceRef.current.dispose();
