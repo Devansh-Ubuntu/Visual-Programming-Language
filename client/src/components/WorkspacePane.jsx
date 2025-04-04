@@ -6,9 +6,8 @@ import { javascriptGenerator } from "blockly/javascript";
 import * as En from "blockly/msg/en";
 import toolbox from "./Toolbox";
 
-import "../blocks/customBlocks.js";
-import "../blocks/custom_generator.js";
-
+// Import the merged custom blocks and generators file
+import "../blocks/customBlocksAndGenerators.js";
 
 Blockly.setLocale(En);
 

@@ -1,3 +1,4 @@
+//src/blocks/custom_generator.js
 import { javascriptGenerator } from "blockly/javascript";
 
 javascriptGenerator['input_block'] = function(block) {
