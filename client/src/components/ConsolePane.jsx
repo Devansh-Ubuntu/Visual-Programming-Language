@@ -1,13 +1,9 @@
-// src/components/ConsolePane.jsx
 import React, { useRef, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
-// Import all sprite sheets
+// Import sprite sheets
 import idleSprite from '../assets/idle.png';
-import walkSprite from '../assets/mascot.png';
-import flipSprite from '../assets/mascot.png';
-import rotateSprite from '../assets/mascot.png';
-import speakSprite from '../assets/mascot.png';
+import walkSprite from '../assets/walk.png';
 
 const ANIMATION_TYPES = {
   IDLE: 'idle',
@@ -21,7 +17,7 @@ const ANIMATION_TYPES = {
 const SPRITE_CONFIG = {
   idle: {
     img: idleSprite,
-    frameCount: 4,
+    frameCount: 2,
     width: 150,
     height: 100,
     loop: true,
@@ -29,33 +25,17 @@ const SPRITE_CONFIG = {
   },
   walk: {
     img: walkSprite,
-    frameCount: 8,
+    frameCount: 4,
     width: 1200,
     height: 310,
     loop: true,
     frameDuration: 100
   },
-  flip: {
-    img: flipSprite,
-    frameCount: 12,
-    width: 1500,
-    height: 310,
-    loop: false,
-    frameDuration: 80
-  },
-  rotate: {
-    img: rotateSprite,
-    frameCount: 16,
-    width: 2000,
-    height: 310,
-    loop: false,
-    frameDuration: 60
-  },
   speak: {
-    img: speakSprite,
-    frameCount: 6,
-    width: 805,
-    height: 310,
+    img: idleSprite, // Reusing idle sprite for speaking
+    frameCount: 4,
+    width: 150,
+    height: 100,
     loop: true,
     frameDuration: 120
   }
@@ -68,7 +48,9 @@ const ConsolePane = ({ onCommand }) => {
     frameIndex: 0,
     steps: 0,
     degrees: 0,
-    message: ''
+    message: '',
+    rotation: 0,
+    isFlipping: false
   });
   const [isSpeaking, setIsSpeaking] = useState(false);
   const mascotRef = useRef(null);
@@ -76,24 +58,23 @@ const ConsolePane = ({ onCommand }) => {
   const offset = useRef({ x: 0, y: 0 });
   const animationRef = useRef(null);
   const initialPosition = useRef({ x: 50, y: 50 });
+  const flipAnimationRef = useRef(null);
+  const rotateAnimationRef = useRef(null);
 
   // Get current sprite config
-  const currentSprite = SPRITE_CONFIG[animation.type];
+  const currentSprite = SPRITE_CONFIG[animation.type] || SPRITE_CONFIG.idle;
   const frameWidth = currentSprite.width / currentSprite.frameCount;
   const frameHeight = currentSprite.height;
 
   // Handle animation frames
   useEffect(() => {
     let stepsCompleted = 0;
-    let degreesCompleted = 0;
     
     const animate = () => {
       setAnimation(prev => {
         // Handle walk animation steps
         if (prev.type === ANIMATION_TYPES.WALK && prev.steps > 0) {
-          const newX = prev.type === ANIMATION_TYPES.WALK ? 
-            position.x + (5 * (prev.steps > 0 ? 1 : -1)) : position.x;
-          
+          const newX = position.x + (5 * (prev.steps > 0 ? 1 : -1));
           setPosition(p => ({ ...p, x: newX }));
           
           if (prev.frameIndex === currentSprite.frameCount - 1) {
@@ -101,21 +82,6 @@ const ConsolePane = ({ onCommand }) => {
             if (stepsCompleted >= Math.abs(prev.steps)) {
               return { ...prev, type: ANIMATION_TYPES.IDLE, frameIndex: 0, steps: 0 };
             }
-          }
-        }
-        
-        // Handle flip animation (360 degrees)
-        if (prev.type === ANIMATION_TYPES.FLIP && !currentSprite.loop) {
-          if (prev.frameIndex === currentSprite.frameCount - 1) {
-            return { ...prev, type: ANIMATION_TYPES.IDLE, frameIndex: 0 };
-          }
-        }
-        
-        // Handle rotate animation (specific degrees)
-        if (prev.type === ANIMATION_TYPES.ROTATE && prev.degrees > 0) {
-          degreesCompleted += (360 / currentSprite.frameCount);
-          if (degreesCompleted >= prev.degrees) {
-            return { ...prev, type: ANIMATION_TYPES.IDLE, frameIndex: 0, degrees: 0 };
           }
         }
         
@@ -140,6 +106,55 @@ const ConsolePane = ({ onCommand }) => {
     };
   }, [animation.type, position.x, currentSprite.frameCount, currentSprite.frameDuration, currentSprite.loop]);
 
+  // Handle flip animation (360 degrees rotation)
+  useEffect(() => {
+    if (animation.isFlipping) {
+      let rotation = 0;
+      const flipSpeed = 20; // degrees per frame
+      
+      const flip = () => {
+        rotation += flipSpeed;
+        if (rotation >= 360) {
+          setAnimation(prev => ({ ...prev, isFlipping: false, rotation: 0 }));
+          clearInterval(flipAnimationRef.current);
+        } else {
+          setAnimation(prev => ({ ...prev, rotation }));
+        }
+      };
+      
+      flipAnimationRef.current = setInterval(flip, 16); // ~60fps
+    }
+    
+    return () => {
+      if (flipAnimationRef.current) clearInterval(flipAnimationRef.current);
+    };
+  }, [animation.isFlipping]);
+
+  // Handle rotate animation (specific degrees)
+  useEffect(() => {
+    if (animation.degrees !== 0) {
+      const targetDegrees = animation.degrees;
+      const rotateSpeed = targetDegrees > 0 ? 5 : -5; // degrees per frame
+      let rotated = 0;
+      
+      const rotate = () => {
+        rotated += rotateSpeed;
+        if (Math.abs(rotated) >= Math.abs(targetDegrees)) {
+          setAnimation(prev => ({ ...prev, degrees: 0, rotation: prev.rotation + targetDegrees }));
+          clearInterval(rotateAnimationRef.current);
+        } else {
+          setAnimation(prev => ({ ...prev, rotation: prev.rotation + rotateSpeed }));
+        }
+      };
+      
+      rotateAnimationRef.current = setInterval(rotate, 16); // ~60fps
+    }
+    
+    return () => {
+      if (rotateAnimationRef.current) clearInterval(rotateAnimationRef.current);
+    };
+  }, [animation.degrees]);
+
   // Handle commands from blocks
   useEffect(() => {
     if (onCommand) {
@@ -147,37 +162,32 @@ const ConsolePane = ({ onCommand }) => {
         switch (command.action) {
           case 'walk':
             setAnimation({
+              ...animation,
               type: ANIMATION_TYPES.WALK,
               frameIndex: 0,
               steps: command.value,
-              degrees: 0,
               message: ''
             });
             break;
           case 'flip':
             setAnimation({
-              type: ANIMATION_TYPES.FLIP,
-              frameIndex: 0,
-              steps: 0,
-              degrees: 0,
-              message: ''
+              ...animation,
+              isFlipping: true,
+              type: ANIMATION_TYPES.IDLE // Use idle sprite for flip
             });
             break;
           case 'rotate':
             setAnimation({
-              type: ANIMATION_TYPES.ROTATE,
-              frameIndex: 0,
-              steps: 0,
+              ...animation,
               degrees: command.value,
-              message: ''
+              type: ANIMATION_TYPES.IDLE // Use idle sprite for rotate
             });
             break;
           case 'speak':
             setAnimation({
+              ...animation,
               type: ANIMATION_TYPES.SPEAK,
               frameIndex: 0,
-              steps: 0,
-              degrees: 0,
               message: command.value
             });
             setIsSpeaking(true);
@@ -189,12 +199,15 @@ const ConsolePane = ({ onCommand }) => {
               frameIndex: 0,
               steps: 0,
               degrees: 0,
+              rotation: 0,
+              isFlipping: false,
               message: ''
             });
             setIsSpeaking(false);
             break;
           default:
             setAnimation({
+              ...animation,
               type: ANIMATION_TYPES.IDLE,
               frameIndex: 0,
               steps: 0,
@@ -206,7 +219,7 @@ const ConsolePane = ({ onCommand }) => {
       
       onCommand(handleCommand);
     }
-  }, [onCommand]);
+  }, [onCommand, animation]);
 
   const handleMouseDown = (e) => {
     isDragging.current = true;
@@ -245,7 +258,12 @@ const ConsolePane = ({ onCommand }) => {
             backgroundPosition: `-${animation.frameIndex * frameWidth}px 0`,
             backgroundSize: `${currentSprite.width}px ${currentSprite.height}px`,
             cursor: 'grab',
-            transform: animation.steps < 0 ? 'scaleX(-1)' : 'scaleX(1)'
+            transform: `
+              scaleX(${animation.steps < 0 ? -1 : 1})
+              rotate(${animation.rotation}deg)
+            `,
+            transformOrigin: 'center center',
+            transition: animation.isFlipping || animation.degrees ? 'none' : 'transform 0.1s ease'
           }}
         />
         {isSpeaking && (

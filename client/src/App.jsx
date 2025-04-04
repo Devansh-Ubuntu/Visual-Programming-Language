@@ -8,6 +8,7 @@ import { saveWorkspace } from "./components/SaveWorkspace";
 import { loadWorkspace } from "./components/LoadWorkspace";
 import DraggableTerminal from "./components/DraggableTerminal";
 import TerminalPane from "./components/TerminalPane";
+import ConsolePane from "./components/ConsolePane"; 
 import "./App.css";
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
       toolbox: document.getElementById("toolbox"),
     });
     workspaceRef.current = workspace;
+    console.log(" Blockly workspace initialized!");
     return () => workspace.dispose();
   }, []);
 
@@ -58,14 +60,16 @@ function App() {
     }
   };
 
-  // Save workspace state to file.
   const handleSave = () => {
+    console.log("handleSave clicked!");
     const workspace = Blockly.getMainWorkspace();
     if (!workspace) {
       console.error("Error: Blockly workspace is not initialized.");
       return;
     }
+
     const allBlocks = workspace.getAllBlocks();
+    console.log(`Total Blocks in Workspace: ${allBlocks.length}`);
     if (allBlocks.length === 0) {
       console.warn("Warning: No blocks in the workspace to save.");
       return;
@@ -73,19 +77,30 @@ function App() {
     try {
       const xmlDom = Blockly.Xml.workspaceToDom(workspace);
       const xmlText = Blockly.Xml.domToText(xmlDom);
+      console.log("Workspace XML:", xmlText);
       saveWorkspace(xmlText, "my_workspace.xml");
     } catch (error) {
       console.error("Error saving workspace:", error);
     }
   };
 
-  // Load workspace state from file.
   const handleLoad = () => {
     loadWorkspace((xmlText) => {
-      if (!xmlText) return;
+      if (!xmlText) {
+        console.warn("No workspace data loaded.");
+        return;
+      }
+
       try {
         const workspace = Blockly.getMainWorkspace();
-        if (!workspace) throw new Error("Blockly workspace not initialized.");
+        if (!workspace) {
+          throw new Error("Blockly workspace not initialized.");
+        }
+
+        if (!Blockly.Xml) {
+          throw new Error("Blockly.Xml is not available. Ensure Blockly is correctly imported.");
+        }
+
         const parser = new DOMParser();
         const xmlDom = parser.parseFromString(xmlText, "text/xml");
         workspace.clear();
@@ -97,8 +112,11 @@ function App() {
     });
   };
 
-  // Adjust workspace layout based on docking.
-  const workspaceStyle = { flex: 1, transition: "all 0.3s ease" };
+  const workspaceStyle = {
+    flex: 1,
+    transition: "all 0.3s ease",
+  };
+
   if (dockInfo.docked) {
     if (dockInfo.edge === "left") workspaceStyle.marginLeft = dockInfo.dockSize.width;
     else if (dockInfo.edge === "right") workspaceStyle.marginRight = dockInfo.dockSize.width;
@@ -110,7 +128,13 @@ function App() {
     <div className="app-container" style={{ display: "flex", height: "100vh", width: "100vw" }}>
       <div className="workspace" style={workspaceStyle}>
         <Header onRun={handleRun} onStop={handleStop} onSave={handleSave} onLoad={handleLoad} />
-        <MainLayout setGeneratedCode={setGeneratedCode} terminalOutput={terminalOutput} />
+        <MainLayout
+          setGeneratedCode={setGeneratedCode}
+          terminalOutput={terminalOutput}
+          onUserInput={handleUserInput}
+        />
+        {/*  Added ConsolePane for Mascot */}
+        <ConsolePane />
       </div>
 
       {/* Dockable terminal component */}
