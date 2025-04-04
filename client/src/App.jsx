@@ -8,7 +8,6 @@ import { saveWorkspace } from "./components/SaveWorkspace";
 import { loadWorkspace } from "./components/LoadWorkspace";
 import DraggableTerminal from "./components/DraggableTerminal";
 import TerminalPane from "./components/TerminalPane";
-import ConsolePane from "./components/ConsolePane";
 import "./App.css";
 
 function App() {
@@ -20,7 +19,6 @@ function App() {
   const interpreterRef = useRef(null);
   const terminalPaneRef = useRef(null);
   const workspaceRef = useRef(null);
-  const mascotCommandHandler = useRef(null);
 
   useEffect(() => {
     // Inject Blockly into the workspace.
@@ -28,38 +26,13 @@ function App() {
       toolbox: document.getElementById("toolbox"),
     });
     workspaceRef.current = workspace;
-    console.log("✅ Blockly workspace initialized!");
-    
-    // Set up the mascot command handler
-    window.handleMascotCommand = (command) => {
-      if (mascotCommandHandler.current) {
-        mascotCommandHandler.current(command);
-      }
-    };
-    
-    return () => {
-      workspace.dispose();
-      delete window.handleMascotCommand;
-    };
+    return () => workspace.dispose();
   }, []);
 
   const handleRun = () => {
     console.log("Run button clicked. Generated code:", generatedCode);
-    
-    // Wrap the generated code with mascot command handler
-    const wrappedCode = `
-      function mascotCommand(command) {
-        if (window.handleMascotCommand) {
-          window.handleMascotCommand(command);
-        }
-      }
-      
-      ${generatedCode}
-    `;
-    
     setTimeout(() => {
       if (interpreterRef.current) {
-        interpreterRef.current.setCode(wrappedCode);
         interpreterRef.current.runCode();
       } else {
         console.error("Interpreter not available!");
@@ -79,59 +52,82 @@ function App() {
     setTerminalOutput((prev) => prev + "\r\nUser input: " + input);
   };
 
+  // Save workspace state to local file.
   const handleSave = () => {
-    console.log("handleSave clicked!");
-    const workspace = Blockly.getMainWorkspace();
+    console.log(" handleSave clicked!");
+
+    //  Ensure workspaceRef is valid
+    const workspace = Blockly.getMainWorkspace(); // Use this to always get the active workspace
+
     if (!workspace) {
-      console.error("Error: Blockly workspace is not initialized.");
-      return;
+        console.error(" Error: Blockly workspace is not initialized.");
+        return;
     }
 
+    //  Check the number of blocks in the workspace
     const allBlocks = workspace.getAllBlocks();
-    console.log(`Total Blocks in Workspace: ${allBlocks.length}`);
+    console.log(` Total Blocks in Workspace: ${allBlocks.length}`);
+
     if (allBlocks.length === 0) {
-      console.warn("Warning: No blocks in the workspace to save.");
-      return;
+        console.warn(" Warning: No blocks in the workspace to save.");
+        return;
     }
 
     try {
-      const xmlDom = Blockly.Xml.workspaceToDom(workspace);
-      const xmlText = Blockly.Xml.domToText(xmlDom);
-      console.log("Workspace XML:", xmlText);
-      saveWorkspace(xmlText, "my_workspace.xml");
+        // Convert the workspace to XML format
+        const xmlDom = Blockly.Xml.workspaceToDom(workspace);
+        const xmlText = Blockly.Xml.domToText(xmlDom);
+
+        console.log(" Workspace XML:", xmlText);
+        
+        // Save workspace using the function
+        saveWorkspace(xmlText, "my_workspace.xml");
+
     } catch (error) {
-      console.error("Error saving workspace:", error);
+        console.error(" Error saving workspace:", error);
     }
   };
 
-  const handleLoad = () => {
-    loadWorkspace((xmlText) => {
+
+
+// Load workspace state from local file.
+const handleLoad = () => {
+  loadWorkspace((xmlText) => {
       if (!xmlText) {
-        console.warn("No workspace data loaded.");
-        return;
+          console.warn(" No workspace data loaded.");
+          return;
       }
 
       try {
-        const workspace = Blockly.getMainWorkspace();
-        if (!workspace) {
-          throw new Error("Blockly workspace not initialized.");
-        }
+          const workspace = Blockly.getMainWorkspace();
+          if (!workspace) {
+              throw new Error("Blockly workspace not initialized.");
+          }
 
-        if (!Blockly.Xml) {
-          throw new Error("Blockly.Xml is not available. Ensure Blockly is correctly imported.");
-        }
+          // FIX: Ensure Blockly.Xml exists before using it
+          if (!Blockly.Xml) {
+              throw new Error("Blockly.Xml is not available. Ensure Blockly is correctly imported.");
+          }
 
-        const parser = new DOMParser();
-        const xmlDom = parser.parseFromString(xmlText, "text/xml");
-        workspace.clear();
-        Blockly.Xml.domToWorkspace(xmlDom.documentElement, workspace);
-        console.log("Workspace loaded successfully!");
+          //  FIX: Correctly parse XML
+          const parser = new DOMParser();
+          const xmlDom = parser.parseFromString(xmlText, "text/xml");
+
+          //  Clear the workspace before loading
+          workspace.clear();
+
+          //  FIX: Load the blocks into the workspace
+          Blockly.Xml.domToWorkspace(xmlDom.documentElement, workspace);
+
+          console.log(" Workspace loaded successfully!");
+
       } catch (err) {
-        console.error("Error loading workspace:", err);
+          console.error(" Error loading workspace:", err);
       }
-    });
-  };
+  });
+};
 
+  // Adjust workspace layout when terminal is docked.
   const workspaceStyle = {
     flex: 1,
     transition: "all 0.3s ease",
@@ -157,11 +153,6 @@ function App() {
           setGeneratedCode={setGeneratedCode}
           terminalOutput={terminalOutput}
           onUserInput={handleUserInput}
-        />
-        <ConsolePane 
-          onCommand={(handler) => {
-            mascotCommandHandler.current = handler;
-          }} 
         />
       </div>
 
