@@ -1,3 +1,4 @@
+//src/blocks/custom_generator.js
 import { javascriptGenerator } from "blockly/javascript";
 
 javascriptGenerator['input_block'] = function(block) {
@@ -11,8 +12,6 @@ javascriptGenerator['delay_block'] = function(block) {
   var code = `delay(${delayTime});\n`;
   return code;
 };
-
-
 javascriptGenerator['get_list_element_safely'] = function(block) {
   var list = javascriptGenerator.valueToCode(block, 'LIST', javascriptGenerator.ORDER_ATOMIC) || '[]';
   var index = javascriptGenerator.valueToCode(block, 'INDEX', javascriptGenerator.ORDER_ATOMIC) || '1';
