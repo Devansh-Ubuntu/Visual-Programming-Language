@@ -26,7 +26,6 @@ function App() {
       toolbox: document.getElementById("toolbox"),
     });
     workspaceRef.current = workspace;
-    console.log("✅ Blockly workspace initialized!");
     return () => workspace.dispose();
   }, []);
 
