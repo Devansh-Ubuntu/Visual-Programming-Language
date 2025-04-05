@@ -37,6 +37,7 @@ const toolbox = {
         { kind: "block", type: "controls_whileUntil" },
         { kind: "block", type: "controls_for" },
         { kind: "block", type: "controls_forEach" },
+        { kind: "block", type: "delay_block" },
         { kind: "block", type: "controls_flow_statements" }
       ]
     },
@@ -63,6 +64,7 @@ const toolbox = {
       contents: [
         { kind: "block", type: "text" },
         { kind: "block", type: "text_print" },
+        { kind: "block", type: "input_block" },
         { kind: "block", type: "text_join" },
         { kind: "block", type: "text_length" },
         { kind: "block", type: "text_isEmpty" },
@@ -85,6 +87,7 @@ const toolbox = {
         { kind: "block", type: "lists_length" },
         { kind: "block", type: "lists_isEmpty" },
         { kind: "block", type: "lists_indexOf" },
+        { kind: "block", type: "get_list_element_safely" },
         { kind: "block", type: "lists_getIndex" },
         { kind: "block", type: "lists_setIndex" },
         { kind: "block", type: "lists_getSublist" },
@@ -105,16 +108,6 @@ const toolbox = {
       colour: "%{BKY_PROCEDURES_HUE}",
       custom: "PROCEDURE"
     },
-    {
-      kind: "category",
-      name: "Custom",
-      colour: "#FF6688",
-      contents: [
-        { kind: "block", type: "input_block" },
-        { kind: "block", type: "delay_block" },
-        { kind: "block", type: "get_list_element_safely" }
-      ]
-    }
   ]
 };
 

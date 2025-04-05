@@ -13,7 +13,7 @@ Blockly.Blocks["input_block"] = {
     this.appendDummyInput()
       .appendField("Enter input");
     this.setOutput(true, "String");
-    this.setColour(230);
+    this.setColour(150);
     this.setTooltip("Asks user for input from a prompt or terminal.");
     this.setHelpUrl("");
   },
@@ -46,7 +46,7 @@ Blockly.Blocks["get_list_element_safely"] = {
       .appendField("at index");
 
     this.setOutput(true, null);
-    this.setColour(230);
+    this.setColour(240);
     this.setTooltip("Gets an element from a list, but throws an error for negative or zero index.");
     this.setHelpUrl("");
   }
