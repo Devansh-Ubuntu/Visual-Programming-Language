@@ -26,7 +26,6 @@ const TerminalPane = forwardRef(({ terminalOutput, onUserInput }, ref) => {
     termInstance.current = new XTerminal({
       cursorBlink: true,
       convertEol: true,
-<<<<<<< HEAD
       theme: {
         background: "#f9f9f9",
         foreground: "#3a3a3a",
@@ -54,26 +53,16 @@ const TerminalPane = forwardRef(({ terminalOutput, onUserInput }, ref) => {
       fontSize: 14,
       rendererType: 'canvas',
       rows: 10,
-=======
-      fontFamily: "monospace",
-      fontSize: 14,
->>>>>>> ea0347fc2ba36603b32e0408d98cf1b7a0e5d7b1
     });
     fitAddon.current = new FitAddon();
     termInstance.current.loadAddon(fitAddon.current);
     termInstance.current.open(terminalRef.current);
     fitAddon.current.fit();
 
-<<<<<<< HEAD
     // Show minimal prompt
     termInstance.current.write("> ");
     prevTerminalOutput.current = "";
     isInitialMount.current = false;
-=======
-    // Write the initial output and prompt.
-    termInstance.current.write(terminalOutput + "\r\n> ");
-    prevTerminalOutput.current = terminalOutput;
->>>>>>> ea0347fc2ba36603b32e0408d98cf1b7a0e5d7b1
 
     // Listen for keystrokes.
     const disposeData = termInstance.current.onData((data) => {
@@ -108,7 +97,7 @@ const TerminalPane = forwardRef(({ terminalOutput, onUserInput }, ref) => {
     };
   }, [onUserInput]);
 
-  // Append any new external output.
+  // Update terminal output when it changes
   useEffect(() => {
     if (!termInstance.current || isInitialMount.current) return;
     
@@ -127,10 +116,9 @@ const TerminalPane = forwardRef(({ terminalOutput, onUserInput }, ref) => {
       }
       prevTerminalOutput.current = terminalOutput;
     }
-  }, [terminalOutput, inputBuffer]);
+  }, [terminalOutput]);
 
   return (
-<<<<<<< HEAD
     <div className="terminal-container">
       <div
         ref={terminalRef}
@@ -144,19 +132,6 @@ const TerminalPane = forwardRef(({ terminalOutput, onUserInput }, ref) => {
         }}
       />
     </div>
-=======
-    <div
-      ref={terminalRef}
-      style={{
-        width: "100%",
-        height: "100%",
-        background: "black",
-        color: "#0f0",
-        padding: "8px",
-        boxSizing: "border-box",
-      }}
-    />
->>>>>>> ea0347fc2ba36603b32e0408d98cf1b7a0e5d7b1
   );
 });
 

@@ -13,6 +13,7 @@ import "./App.css";
 function App() {
   const [generatedCode, setGeneratedCode] = useState("");
   const [terminalOutput, setTerminalOutput] = useState("");
+  const [workspaceState, setWorkspaceState] = useState(null);
   const [dockInfo, setDockInfo] = useState({ docked: false, edge: null, dockSize: {} });
 
   const interpreterRef = useRef(null);
@@ -28,6 +29,10 @@ function App() {
     console.log(" Blockly workspace initialized!");
     return () => workspace.dispose();
   }, []);
+
+  const clearTerminal = () => {
+    setTerminalOutput("");
+  };
 
   // Run button handler: call the interpreter's runCode method.
   const handleRun = () => {
@@ -53,11 +58,11 @@ function App() {
   // User input coming from the TerminalPane.
   const handleUserInput = (input) => {
     console.log("User input:", input);
-    setTerminalOutput((prev) => prev + "\r\nUser input: " + input);
-    // Forward input to interpreter if available.
-    if (interpreterRef.current && interpreterRef.current.handleUserInput) {
-      interpreterRef.current.handleUserInput(input);
+    if (input.trim().toLowerCase() === "clear") {
+      clearTerminal();
+      return;
     }
+    setTerminalOutput(prev => prev + "\r\nUser input: " + input);
   };
 
   const handleSave = () => {
@@ -155,7 +160,7 @@ function App() {
             </div>
           </div>
         </div>
-        <div className="workspace-panel">
+        <div className="workspace-panel" style={workspaceStyle}>
           <MainLayout
             setGeneratedCode={setGeneratedCode}
             terminalOutput={terminalOutput}
