@@ -47,7 +47,7 @@ Blockly.Blocks["get_list_element_safely"] = {
       .setCheck("Number")
       .appendField("at index");
     this.setOutput(true);
-    this.setColour(240);
+    this.setColour(265);
     this.setTooltip("Gets an element from a list safely.");
     this.setHelpUrl("https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array");
   },
@@ -75,7 +75,7 @@ Blockly.defineBlocksWithJsonArray([
     args0: [{ type: "input_value", name: "STEPS", check: "Number" }],
     previousStatement: null,
     nextStatement: null,
-    colour: 230,
+    colour: 15,
     tooltip: "Make the mascot walk the specified number of steps",
   },
   {
@@ -83,7 +83,7 @@ Blockly.defineBlocksWithJsonArray([
     message0: "do a flip",
     previousStatement: null,
     nextStatement: null,
-    colour: 230,
+    colour: 15,
     tooltip: "Make the mascot do a 360° flip",
   },
   {
@@ -92,7 +92,7 @@ Blockly.defineBlocksWithJsonArray([
     args0: [{ type: "input_value", name: "DEGREES", check: "Number" }],
     previousStatement: null,
     nextStatement: null,
-    colour: 230,
+    colour: 15,
     tooltip: "Rotate the mascot by specified degrees",
   },
   {
@@ -104,7 +104,7 @@ Blockly.defineBlocksWithJsonArray([
     ],
     previousStatement: null,
     nextStatement: null,
-    colour: 230,
+    colour: 15,
     tooltip: "Make the mascot say something for a given number of seconds",
   },
   {
@@ -112,7 +112,7 @@ Blockly.defineBlocksWithJsonArray([
     message0: "reset position",
     previousStatement: null,
     nextStatement: null,
-    colour: 230,
+    colour: 15,
     tooltip: "Reset the mascot to its starting position",
   },
 ]);

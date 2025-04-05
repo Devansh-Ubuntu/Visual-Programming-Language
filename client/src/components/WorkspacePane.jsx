@@ -55,7 +55,16 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange, onM
       workspaceRef.current = Blockly.inject(blocklyDiv.current, {
         toolbox: toolbox,
         trashcan: true,
+        zoom:
+        {controls: true,
+         wheel: true,
+         startScale: 1.0,
+         maxScale: 3,
+         minScale: 0.3,
+         scaleSpeed: 1.2,
+         pinch: true},
         scrollbars: true,
+        
       });
       if (onMascotCommand) {
         window.handleMascotCommand = onMascotCommand;
