@@ -3,14 +3,23 @@ import React from "react";
 
 function Header({ onRun, onStop, onSave, onLoad }) {
   return (
-    <header style={{ height: "40px", backgroundColor: "#222", color: "#fff", display: "flex", alignItems: "center", padding: "0 10px", gap: "10px", justifyContent: "space-between" }}>
-      <div>
-        <button onClick={onRun}>Run</button>
-        <button onClick={onStop}>Stop</button>
+    <header className="app-header">
+      <div className="app-logo">Block Coder</div>
+      <div className="header-buttons">
+        <button className="run-button" onClick={onRun}>
+          ▶ Run
+        </button>
+        <button className="stop-button" onClick={onStop}>
+          ■ Stop
+        </button>
       </div>
-      <div>
-        <button onClick={onSave}>Save</button>
-        <button onClick={onLoad}>Load</button>
+      <div className="file-buttons">
+        <button onClick={onSave}>
+          Save
+        </button>
+        <button onClick={onLoad}>
+          Load
+        </button>
       </div>
     </header>
   );

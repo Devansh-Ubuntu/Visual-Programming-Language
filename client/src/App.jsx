@@ -6,7 +6,6 @@ import * as Blockly from "blockly";
 import JSInterpreterRunner from "./components/JSInterpreterRunner";
 import { saveWorkspace } from "./components/SaveWorkspace";
 import { loadWorkspace } from "./components/LoadWorkspace";
-import DraggableTerminal from "./components/DraggableTerminal";
 import TerminalPane from "./components/TerminalPane";
 import ConsolePane from "./components/ConsolePane"; 
 import "./App.css";
@@ -15,7 +14,6 @@ function App() {
   const [generatedCode, setGeneratedCode] = useState("");
   const [terminalOutput, setTerminalOutput] = useState("");
   const [workspaceState, setWorkspaceState] = useState(null);
-  const [dockInfo, setDockInfo] = useState({ docked: false, edge: null, dockSize: {} });
 
   const interpreterRef = useRef(null);
   const terminalPaneRef = useRef(null);
@@ -31,8 +29,13 @@ function App() {
     return () => workspace.dispose();
   }, []);
 
+  const clearTerminal = () => {
+    setTerminalOutput("");
+  };
+
   const handleRun = () => {
-    console.log("Run button clicked. Generated code:", generatedCode);
+    console.log("Run button clicked");
+    clearTerminal();
     setTimeout(() => {
       if (interpreterRef.current) {
         interpreterRef.current.runCode();
@@ -51,7 +54,11 @@ function App() {
 
   const handleUserInput = (input) => {
     console.log("User input:", input);
-    setTerminalOutput((prev) => prev + "\r\nUser input: " + input);
+    if (input.trim().toLowerCase() === "clear") {
+      clearTerminal();
+      return;
+    }
+    setTerminalOutput(prev => prev + "\r\nUser input: " + input);
   };
 
   const handleSave = () => {
@@ -107,56 +114,45 @@ function App() {
     });
   };
 
-  const workspaceStyle = {
-    flex: 1,
-    transition: "all 0.3s ease",
-  };
-
-  if (dockInfo.docked) {
-    if (dockInfo.edge === "left") {
-      workspaceStyle.marginLeft = dockInfo.dockSize.width;
-    } else if (dockInfo.edge === "right") {
-      workspaceStyle.marginRight = dockInfo.dockSize.width;
-    } else if (dockInfo.edge === "top") {
-      workspaceStyle.marginTop = dockInfo.dockSize.height;
-    } else if (dockInfo.edge === "bottom") {
-      workspaceStyle.marginBottom = dockInfo.dockSize.height;
-    }
-  }
-
   return (
-    <div className="app-container" style={{ display: "flex", height: "100vh", width: "100vw" }}>
-      <div className="workspace" style={workspaceStyle}>
-        <Header onRun={handleRun} onStop={handleStop} onSave={handleSave} onLoad={handleLoad} />
-        <MainLayout
-          setGeneratedCode={setGeneratedCode}
-          terminalOutput={terminalOutput}
-          onUserInput={handleUserInput}
-        />
-        {/*  Added ConsolePane for Mascot */}
-        <ConsolePane />
-      </div>
-
-      {/* Dockable terminal component */}
-      <DraggableTerminal
-        terminalOutput={terminalOutput}
-        onUserInput={handleUserInput}
-        onDockChange={(info) => setDockInfo(info)}
-        terminalPaneRef={terminalPaneRef}
-      >
-        <>
-          <TerminalPane
-            ref={terminalPaneRef}
+    <div className="app-container">
+      <Header 
+        onRun={handleRun} 
+        onStop={handleStop} 
+        onSave={handleSave} 
+        onLoad={handleLoad} 
+      />
+      <div className="main-content">
+        <div className="left-panel">
+          <div className="stage-panel">
+            <ConsolePane />
+          </div>
+          <div className="terminal-panel">
+            <div className="terminal-container">
+              <div className="terminal-header">
+                Output Terminal
+              </div>
+              <TerminalPane
+                ref={terminalPaneRef}
+                terminalOutput={terminalOutput}
+                onUserInput={handleUserInput}
+              />
+              <JSInterpreterRunner
+                ref={interpreterRef}
+                code={generatedCode}
+                setTerminalOutput={setTerminalOutput}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="workspace-panel">
+          <MainLayout
+            setGeneratedCode={setGeneratedCode}
             terminalOutput={terminalOutput}
             onUserInput={handleUserInput}
           />
-          <JSInterpreterRunner
-            ref={interpreterRef}
-            code={generatedCode}
-            setTerminalOutput={setTerminalOutput}
-          />
-        </>
-      </DraggableTerminal>
+        </div>
+      </div>
     </div>
   );
 }

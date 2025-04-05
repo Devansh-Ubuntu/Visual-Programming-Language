@@ -101,26 +101,32 @@ export default function DraggableTerminal({
       style={{
         display: "flex",
         flexDirection: "column",
-        background: "#000",
-        border: "2px solid #0f0",
-        borderRadius: "5px",
+        background: "#f9f9f9",
+        border: "1px solid #ddd",
+        borderRadius: "8px",
         overflow: "hidden",
         zIndex: 9999,
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
       }}
     >
       <div
         className="draggable-header"
         style={{
-          background: "#333",
+          background: "var(--scratch-header)",
+          backgroundImage: "linear-gradient(to bottom, var(--scratch-header), var(--scratch-header-dark))",
           color: "#fff",
-          padding: "5px 10px",
+          padding: "8px 12px",
           cursor: "move",
           userSelect: "none",
+          fontWeight: "bold",
+          fontSize: "0.9rem",
         }}
       >
-        Terminal
+        Output Terminal
       </div>
-      {children}
+      <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+        {children}
+      </div>
     </Rnd>
   );
 }

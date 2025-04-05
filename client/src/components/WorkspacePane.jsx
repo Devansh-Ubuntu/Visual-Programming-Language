@@ -117,7 +117,7 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange, onM
   return (
     <div
       id="blocklyDiv"
-      style={{ width: "100%", height: "calc(100vh - 40px)" }}
+      className="blockly-workspace"
       ref={blocklyDiv}
     />
   );

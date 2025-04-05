@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Main block shape -->
+  <rect x="15" y="15" width="70" height="40" rx="8" fill="#4C97FF" stroke="#3373CC" stroke-width="2"/>
+  <!-- Notch top -->
+  <rect x="25" y="5" width="20" height="10" rx="3" fill="#4C97FF" stroke="#3373CC" stroke-width="2"/>
+  <!-- Notch bottom -->
+  <rect x="25" y="55" width="20" height="10" rx="3" fill="#4C97FF" stroke="#3373CC" stroke-width="2"/>
+  <!-- Connector -->
+  <rect x="55" y="65" width="20" height="20" rx="3" fill="#9966FF" stroke="#774DCB" stroke-width="2"/>
+</svg> 

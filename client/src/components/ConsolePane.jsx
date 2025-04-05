@@ -18,24 +18,24 @@ const SPRITE_CONFIG = {
   idle: {
     img: idleSprite,
     frameCount: 2,
-    width: 150,
-    height: 100,
+    width: 300,
+    height: 200,
     loop: true,
     frameDuration: 150
   },
   walk: {
     img: walkSprite,
     frameCount: 4,
-    width: 1200,
-    height: 310,
+    width: 2400,
+    height: 620,
     loop: true,
     frameDuration: 100
   },
   speak: {
     img: idleSprite, // Reusing idle sprite for speaking
     frameCount: 4,
-    width: 150,
-    height: 100,
+    width: 300,
+    height: 200,
     loop: true,
     frameDuration: 120
   }
@@ -243,8 +243,14 @@ const ConsolePane = ({ onCommand }) => {
 
   return (
     <div className="console-pane" onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}>
-      <h3>Mascot</h3>
+      <div className="console-pane-header">
+      </div>
       <div className="mascot-container">
+        {isSpeaking && animation.message && (
+          <div className="speech-bubble">
+            {animation.message}
+          </div>
+        )}
         <div
           ref={mascotRef}
           onMouseDown={handleMouseDown}
@@ -266,24 +272,6 @@ const ConsolePane = ({ onCommand }) => {
             transition: animation.isFlipping || animation.degrees ? 'none' : 'transform 0.1s ease'
           }}
         />
-        {isSpeaking && (
-          <div 
-            className="speech-bubble"
-            style={{
-              position: 'absolute',
-              left: `${position.x + frameWidth}px`,
-              top: `${position.y - 50}px`,
-              backgroundColor: 'white',
-              padding: '10px',
-              borderRadius: '10px',
-              border: '2px solid #333',
-              maxWidth: '200px',
-              wordWrap: 'break-word'
-            }}
-          >
-            {animation.message}
-          </div>
-        )}
       </div>
     </div>
   );

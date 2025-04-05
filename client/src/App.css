@@ -1,4 +1,17 @@
 /* App.css */
+@import url('https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;500;700&display=swap');
+
+:root {
+  --scratch-orange: #ff7b26;
+  --scratch-blue: #4C97FF;
+  --scratch-dark-blue: #3373CC;
+  --scratch-purple: #9966FF;
+  --scratch-header: #4D97FF;
+  --scratch-header-dark: #4280D7;
+  --scratch-text: #575e75;
+  --scratch-background: #f9f9f9;
+  --left-panel-width: 480px;
+}
 
 html, body, #root {
   margin: 0;
@@ -6,16 +19,227 @@ html, body, #root {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  font-family: sans-serif;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  color: var(--scratch-text);
+  background-color: var(--scratch-background);
 }
+
+/* Main layout */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 50px);
+  overflow: hidden;
+}
+
+.left-panel {
+  width: var(--left-panel-width);
+  min-width: var(--left-panel-width);
+  background: white;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.stage-panel {
+  height: 360px;
+  min-height: 360px;
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  z-index: 0;
+}
+
+.terminal-panel {
+  flex: 1;
+  position: relative;
+  padding: 10px;
+  overflow: hidden;
+}
+
+.workspace-panel {
+  flex: 1;
+  background: var(--scratch-background);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Header styling */
+.app-header {
+  height: 50px;
+  background-color: var(--scratch-header);
+  background-image: linear-gradient(to bottom, var(--scratch-header), var(--scratch-header-dark));
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 15px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.app-header button {
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  color: white;
+  font-weight: bold;
+  padding: 0.5em 1em;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.app-header button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+.app-header .run-button {
+  background-color: #4CAF50;
+}
+
+.app-header .stop-button {
+  background-color: #f44336;
+}
+
+.app-logo {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-right: 20px;
+}
+
+/* Console pane */
+.console-pane {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+}
+
+.console-pane-header {
+  background-color: transparent;
+  padding: 0;
+  height: 0;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  text-align: left;
+  margin-bottom: 0;
+}
+
+.mascot-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+/* Terminal styling */
+.terminal-container {
+  height: 100%;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.xterm {
+  padding: 8px;
+  height: 100%;
+}
+
+.xterm-viewport,
+.xterm-screen {
+  height: 100% !important;
+}
+
+/* Speech bubble */
+.speech-bubble {
+  position: absolute;
+  background-color: white;
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px solid var(--scratch-header);
+  max-width: 200px;
+  word-wrap: break-word;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.speech-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 20%;
+  border-width: 10px 10px 0;
+  border-style: solid;
+  border-color: white transparent transparent;
+}
+
+/* Blockly workspace styling */
+.blockly-workspace {
+  width: 100%;
+  height: 100%;
+  background: white;
+}
+
+#blocklyDiv {
+  width: 100%;
+  height: 100%;
+}
+
+/* Block workspace styling */
+.blockly-workspace {
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+#blocklyDiv {
+  border-radius: 8px;
+  background-color: white !important;
+}
+
+/* Terminal styling */
+.terminal-pane {
+  background-color: #1e1e1e;
+  color: #fff;
+  padding: 10px;
+  box-sizing: border-box;
+  border-radius: 8px;
+}
+
+/* Console pane */
 .console-pane {
   position: absolute;
-  bottom: 50px; /* Adjusted to be more visible */
-  right: 50px; /* Moved slightly left */
-  width: 300px; /* Slightly larger for better visibility */
+  bottom: 50px;
+  right: 50px;
+  width: 300px;
   height: 250px;
-  background: #f0f0f0;
-  border: 2px solid #ccc;
+  background: white;
+  border: 2px solid var(--scratch-header);
   border-radius: 8px;
   padding: 10px;
   text-align: center;
@@ -23,89 +247,106 @@ html, body, #root {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2); /* Adds a soft shadow */
-}
-
-.mascot-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .mascot {
-  position: absolute;
-  width: 80px; /* Adjusted for better fit */
+  position: relative;
+  width: 120px;
   height: auto;
   cursor: grab;
+  z-index: 1;
 }
 
-
-.app-container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
-.app-header {
-  height: 40px;
-  background-color: #222;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  padding: 0 10px;
-  gap: 10px;
-}
-
-.app-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.workspace-pane {
-  background-color: #fff;
-  position: relative;
-  height: 100%;
-}
-
-.blockly-workspace {
-  width: 100%;
-  height: 100%;
-}
-*/
-.console-pane {
-  background-color: #2f2f2f;
-  color: #0f0;
-  padding: 10px;
-  box-sizing: border-box;
-}
-
-.terminal-pane {
-  background-color: #1e1e1e;
-  color: #fff;
-  padding: 10px;
-  box-sizing: border-box;
-}
-
+/* Split panes */
 .split > .gutter {
-  background-color: #ccc; 
+  background-color: #f0f0f0;
   background-repeat: no-repeat;
   background-position: 50%;
 }
+
 .split > .gutter:hover {
-  background-color: #999;
+  background-color: var(--scratch-header);
 }
+
 .split-horizontal > .gutter {
   cursor: col-resize;
 }
+
 .split-vertical > .gutter {
   cursor: row-resize;
 }
 
+/* Make the Blockly UI consistent with Scratch */
 .blocklyWidgetDiv {
   background: transparent !important;
   box-shadow: none !important;
+}
+
+.blocklyToolboxDiv {
+  background-color: #f9f9f9 !important;
+  border-right: 1px solid #ddd !important;
+}
+
+.blocklyTreeRow {
+  margin: 6px 0 !important;
+  padding: 6px !important;
+  border-radius: 4px !important;
+}
+
+.blocklyTreeRowContentContainer {
+  display: flex !important;
+  align-items: center !important;
+  font-size: 0.9rem !important;
+}
+
+.blocklyTreeLabel {
+  font-family: 'Helvetica Neue', Arial, sans-serif !important;
+  font-size: 0.9rem !important;
+}
+
+/* Main content area */
+.workspace-container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Console pane enhancements */
+.console-pane-header {
+  background-color: transparent;
+  padding: 0;
+  height: 0;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  text-align: left;
+  margin-bottom: 0;
+}
+
+/* Terminal improvements */
+.terminal-container {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background-color: #f9f9f9;
+}
+
+/* Fix for xterm cursor */
+.xterm-cursor-layer {
+  display: block !important;
+}
+
+/* Terminal header */
+.terminal-header {
+  background-color: var(--scratch-header);
+  background-image: linear-gradient(to bottom, var(--scratch-header), var(--scratch-header-dark));
+  color: white;
+  padding: 8px 12px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
 }
