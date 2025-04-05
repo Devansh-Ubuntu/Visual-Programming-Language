@@ -1,19 +1,18 @@
-import React, { useRef, useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import React, { useRef, useState, useEffect } from "react";
+import PropTypes from "prop-types";
 
-// Import sprite sheets
-import idleSprite from '../assets/idle.png';
-import walkSprite from '../assets/walk.png';
+// Import sprite sheets and assets
+import idleSprite from "../assets/idle.png";
+import walkSprite from "../assets/walk.png";
 
 const ANIMATION_TYPES = {
-  IDLE: 'idle',
-  WALK: 'walk',
-  FLIP: 'flip',
-  ROTATE: 'rotate',
-  SPEAK: 'speak'
+  IDLE: "idle",
+  WALK: "walk",
+  FLIP: "flip",
+  ROTATE: "rotate",
+  SPEAK: "speak"
 };
 
-// Sprite sheet configurations
 const SPRITE_CONFIG = {
   idle: {
     img: idleSprite,
@@ -32,7 +31,7 @@ const SPRITE_CONFIG = {
     frameDuration: 100
   },
   speak: {
-    img: idleSprite, // Reusing idle sprite for speaking
+    img: idleSprite,
     frameCount: 4,
     width: 300,
     height: 200,
@@ -48,193 +47,184 @@ const ConsolePane = ({ onCommand }) => {
     frameIndex: 0,
     steps: 0,
     degrees: 0,
-    message: '',
+    message: "",
     rotation: 0,
     isFlipping: false
   });
   const [isSpeaking, setIsSpeaking] = useState(false);
+
   const mascotRef = useRef(null);
   const isDragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
   const animationRef = useRef(null);
-  const initialPosition = useRef({ x: 50, y: 50 });
   const flipAnimationRef = useRef(null);
   const rotateAnimationRef = useRef(null);
+  const speakTimeoutRef = useRef(null);
+  const initialPosition = useRef({ x: 50, y: 50 });
 
-  // Get current sprite config
   const currentSprite = SPRITE_CONFIG[animation.type] || SPRITE_CONFIG.idle;
   const frameWidth = currentSprite.width / currentSprite.frameCount;
   const frameHeight = currentSprite.height;
 
-  // Handle animation frames
+  // Animation loop for frame updates.
   useEffect(() => {
     let stepsCompleted = 0;
-    
     const animate = () => {
       setAnimation(prev => {
-        // Handle walk animation steps
-        if (prev.type === ANIMATION_TYPES.WALK && prev.steps > 0) {
-          const newX = position.x + (5 * (prev.steps > 0 ? 1 : -1));
-          setPosition(p => ({ ...p, x: newX }));
-          
+        if (prev.type === ANIMATION_TYPES.WALK && prev.steps !== 0) {
+          const direction = Number(prev.steps) > 0 ? 1 : -1;
+          setPosition(pos => ({ x: pos.x + 5 * direction, y: pos.y }));
           if (prev.frameIndex === currentSprite.frameCount - 1) {
             stepsCompleted++;
-            if (stepsCompleted >= Math.abs(prev.steps)) {
+            if (stepsCompleted >= Math.abs(Number(prev.steps))) {
               return { ...prev, type: ANIMATION_TYPES.IDLE, frameIndex: 0, steps: 0 };
             }
           }
         }
-        
-        // Handle speak animation
-        if (prev.type === ANIMATION_TYPES.SPEAK) {
-          if (!currentSprite.loop && prev.frameIndex === currentSprite.frameCount - 1) {
-            setIsSpeaking(false);
-            return { ...prev, type: ANIMATION_TYPES.IDLE, frameIndex: 0, message: '' };
-          }
+        if (prev.type === ANIMATION_TYPES.SPEAK && !currentSprite.loop && prev.frameIndex === currentSprite.frameCount - 1) {
+          setIsSpeaking(false);
+          return { ...prev, type: ANIMATION_TYPES.IDLE, frameIndex: 0, message: "" };
         }
-        
-        // Advance frame
         const nextIndex = (prev.frameIndex + 1) % currentSprite.frameCount;
         return { ...prev, frameIndex: nextIndex };
       });
     };
-    
     animationRef.current = setInterval(animate, currentSprite.frameDuration);
-    
-    return () => {
-      if (animationRef.current) clearInterval(animationRef.current);
-    };
-  }, [animation.type, position.x, currentSprite.frameCount, currentSprite.frameDuration, currentSprite.loop]);
+    return () => clearInterval(animationRef.current);
+  }, [animation.type, currentSprite.frameCount, currentSprite.frameDuration, currentSprite.loop]);
 
-  // Handle flip animation (360 degrees rotation)
+  // Flip animation effect.
   useEffect(() => {
-    if (animation.isFlipping) {
-      let rotation = 0;
-      const flipSpeed = 20; // degrees per frame
-      
-      const flip = () => {
-        rotation += flipSpeed;
-        if (rotation >= 360) {
-          setAnimation(prev => ({ ...prev, isFlipping: false, rotation: 0 }));
-          clearInterval(flipAnimationRef.current);
-        } else {
-          setAnimation(prev => ({ ...prev, rotation }));
-        }
-      };
-      
-      flipAnimationRef.current = setInterval(flip, 16); // ~60fps
-    }
-    
-    return () => {
-      if (flipAnimationRef.current) clearInterval(flipAnimationRef.current);
+    if (!animation.isFlipping) return;
+    let rot = 0;
+    const flipSpeed = 20;
+    const flipStep = () => {
+      rot += flipSpeed;
+      if (rot >= 360) {
+        setAnimation(prev => ({ ...prev, isFlipping: false, rotation: 0 }));
+        clearInterval(flipAnimationRef.current);
+      } else {
+        setAnimation(prev => ({ ...prev, rotation: rot }));
+      }
     };
+    flipAnimationRef.current = setInterval(flipStep, 16);
+    return () => clearInterval(flipAnimationRef.current);
   }, [animation.isFlipping]);
 
-  // Handle rotate animation (specific degrees)
+  // Rotate animation effect.
   useEffect(() => {
-    if (animation.degrees !== 0) {
-      const targetDegrees = animation.degrees;
-      const rotateSpeed = targetDegrees > 0 ? 5 : -5; // degrees per frame
-      let rotated = 0;
-      
-      const rotate = () => {
-        rotated += rotateSpeed;
-        if (Math.abs(rotated) >= Math.abs(targetDegrees)) {
-          setAnimation(prev => ({ ...prev, degrees: 0, rotation: prev.rotation + targetDegrees }));
-          clearInterval(rotateAnimationRef.current);
-        } else {
-          setAnimation(prev => ({ ...prev, rotation: prev.rotation + rotateSpeed }));
-        }
-      };
-      
-      rotateAnimationRef.current = setInterval(rotate, 16); // ~60fps
-    }
-    
-    return () => {
-      if (rotateAnimationRef.current) clearInterval(rotateAnimationRef.current);
+    if (animation.degrees === 0) return;
+    const target = Number(animation.degrees);
+    const speed = target > 0 ? 5 : -5;
+    let rotated = 0;
+    const rotateStep = () => {
+      rotated += speed;
+      if (Math.abs(rotated) >= Math.abs(target)) {
+        setAnimation(prev => ({
+          ...prev,
+          degrees: 0,
+          rotation: prev.rotation + target
+        }));
+        clearInterval(rotateAnimationRef.current);
+      } else {
+        setAnimation(prev => ({
+          ...prev,
+          rotation: prev.rotation + speed
+        }));
+      }
     };
+    rotateAnimationRef.current = setInterval(rotateStep, 16);
+    return () => clearInterval(rotateAnimationRef.current);
   }, [animation.degrees]);
 
-  // Handle commands from blocks
+  // IMPORTANT: Expose the mascot command handler upward.
   useEffect(() => {
-    if (onCommand) {
-      const handleCommand = (command) => {
-        switch (command.action) {
-          case 'walk':
-            setAnimation({
-              ...animation,
-              type: ANIMATION_TYPES.WALK,
-              frameIndex: 0,
-              steps: command.value,
-              message: ''
-            });
-            break;
-          case 'flip':
-            setAnimation({
-              ...animation,
-              isFlipping: true,
-              type: ANIMATION_TYPES.IDLE // Use idle sprite for flip
-            });
-            break;
-          case 'rotate':
-            setAnimation({
-              ...animation,
-              degrees: command.value,
-              type: ANIMATION_TYPES.IDLE // Use idle sprite for rotate
-            });
-            break;
-          case 'speak':
-            setAnimation({
-              ...animation,
-              type: ANIMATION_TYPES.SPEAK,
-              frameIndex: 0,
-              message: command.value
-            });
-            setIsSpeaking(true);
-            break;
-          case 'reset':
-            setPosition(initialPosition.current);
-            setAnimation({
-              type: ANIMATION_TYPES.IDLE,
-              frameIndex: 0,
-              steps: 0,
-              degrees: 0,
-              rotation: 0,
-              isFlipping: false,
-              message: ''
-            });
-            setIsSpeaking(false);
-            break;
-          default:
-            setAnimation({
-              ...animation,
-              type: ANIMATION_TYPES.IDLE,
-              frameIndex: 0,
-              steps: 0,
-              degrees: 0,
-              message: ''
-            });
+    if (!onCommand) return;
+    const handleCommand = (command) => {
+      console.log("ConsolePane received command:", command);
+      switch (command.action) {
+        case "walk": {
+          const steps = Number(command.value) || 0;
+          setAnimation(prev => ({
+            ...prev,
+            type: ANIMATION_TYPES.WALK,
+            frameIndex: 0,
+            steps: steps
+          }));
+          break;
         }
-      };
-      
-      onCommand(handleCommand);
-    }
-  }, [onCommand, animation]);
+        case "flip":
+          setAnimation(prev => ({
+            ...prev,
+            type: ANIMATION_TYPES.IDLE,
+            isFlipping: true
+          }));
+          break;
+        case "rotate":
+          setAnimation(prev => ({
+            ...prev,
+            type: ANIMATION_TYPES.IDLE,
+            degrees: Number(command.value) || 0
+          }));
+          break;
+        case "speak":
+          clearTimeout(speakTimeoutRef.current);
+          setAnimation(prev => ({
+            ...prev,
+            type: ANIMATION_TYPES.SPEAK,
+            frameIndex: 0,
+            message: command.message
+          }));
+          setIsSpeaking(true);
+          speakTimeoutRef.current = setTimeout(() => {
+            setIsSpeaking(false);
+            setAnimation(prev => ({
+              ...prev,
+              type: ANIMATION_TYPES.IDLE,
+              frameIndex: 0,
+              message: ""
+            }));
+          }, (command.duration || 1) * 1000);
+          break;
+        case "reset":
+          setPosition(initialPosition.current);
+          setAnimation({
+            type: ANIMATION_TYPES.IDLE,
+            frameIndex: 0,
+            steps: 0,
+            degrees: 0,
+            message: "",
+            rotation: 0,
+            isFlipping: false
+          });
+          setIsSpeaking(false);
+          break;
+        default:
+          setAnimation(prev => ({
+            ...prev,
+            type: ANIMATION_TYPES.IDLE,
+            frameIndex: 0,
+            steps: 0,
+            degrees: 0,
+            message: ""
+          }));
+      }
+    };
 
+    // Pass our command handler upward.
+    onCommand(handleCommand);
+    return () => clearTimeout(speakTimeoutRef.current);
+  }, [onCommand]);
+
+  // Drag handlers for repositioning the mascot.
   const handleMouseDown = (e) => {
     isDragging.current = true;
-    offset.current = {
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
-    };
+    offset.current = { x: e.clientX - position.x, y: e.clientY - position.y };
   };
 
   const handleMouseMove = (e) => {
     if (!isDragging.current) return;
-    setPosition({
-      x: e.clientX - offset.current.x,
-      y: e.clientY - offset.current.y,
-    });
+    setPosition({ x: e.clientX - offset.current.x, y: e.clientY - offset.current.y });
   };
 
   const handleMouseUp = () => {
@@ -243,8 +233,6 @@ const ConsolePane = ({ onCommand }) => {
 
   return (
     <div className="console-pane" onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}>
-      <div className="console-pane-header">
-      </div>
       <div className="mascot-container">
         {isSpeaking && animation.message && (
           <div className="speech-bubble">
@@ -255,21 +243,18 @@ const ConsolePane = ({ onCommand }) => {
           ref={mascotRef}
           onMouseDown={handleMouseDown}
           style={{
-            position: 'absolute',
-            left: `${position.x}px`,
-            top: `${position.y}px`,
-            width: `${frameWidth}px`,
-            height: `${frameHeight}px`,
+            position: "absolute",
+            left: position.x,
+            top: position.y,
+            width: frameWidth,
+            height: frameHeight,
             backgroundImage: `url(${currentSprite.img})`,
             backgroundPosition: `-${animation.frameIndex * frameWidth}px 0`,
             backgroundSize: `${currentSprite.width}px ${currentSprite.height}px`,
-            cursor: 'grab',
-            transform: `
-              scaleX(${animation.steps < 0 ? -1 : 1})
-              rotate(${animation.rotation}deg)
-            `,
-            transformOrigin: 'center center',
-            transition: animation.isFlipping || animation.degrees ? 'none' : 'transform 0.1s ease'
+            cursor: "grab",
+            transform: `scaleX(${animation.steps < 0 ? -1 : 1}) rotate(${animation.rotation}deg)`,
+            transformOrigin: "center center",
+            transition: animation.isFlipping || animation.degrees ? "none" : "transform 0.1s ease"
           }}
         />
       </div>

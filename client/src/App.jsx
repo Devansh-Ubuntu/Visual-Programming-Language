@@ -1,5 +1,4 @@
-// src/App.jsx
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useCallback, useEffect } from "react";
 import Header from "./components/Header";
 import MainLayout from "./layouts/MainLayout";
 import * as Blockly from "blockly";
@@ -13,17 +12,10 @@ import "./App.css";
 function App() {
   const [generatedCode, setGeneratedCode] = useState("");
   const [terminalOutput, setTerminalOutput] = useState("");
-  const [workspaceState, setWorkspaceState] = useState(null);
   const [dockInfo, setDockInfo] = useState({ docked: false, edge: null, dockSize: {} });
-
-  // NEW: State to hold a pending input callback for prompt()
   const [pendingInputCallback, setPendingInputCallback] = useState(null);
-  const handlePendingInput = (callback) => {
-    setPendingInputCallback(() => callback);
-  };
-  const clearPendingInputCallback = () => {
-    setPendingInputCallback(null);
-  };
+  // State to hold the mascot command handler from ConsolePane.
+  const [mascotHandler, setMascotHandler] = useState(null);
 
   const interpreterRef = useRef(null);
   const terminalPaneRef = useRef(null);
@@ -35,7 +27,7 @@ function App() {
       toolbox: document.getElementById("toolbox"),
     });
     workspaceRef.current = workspace;
-    console.log(" Blockly workspace initialized!");
+    console.log("Blockly workspace initialized!");
     return () => workspace.dispose();
   }, []);
 
@@ -43,10 +35,11 @@ function App() {
     setTerminalOutput("");
   };
 
-  // Run button handler: call the interpreter's runCode method.
+  // Run button handler.
   const handleRun = () => {
     console.log("Run button clicked");
     clearTerminal();
+    // Wait a short time to make sure all handlers are set
     setTimeout(() => {
       if (interpreterRef.current) {
         interpreterRef.current.runCode();
@@ -64,7 +57,7 @@ function App() {
     }
   };
 
-  // User input coming from the TerminalPane.
+  // User input from TerminalPane.
   const handleUserInput = (input) => {
     console.log("User input:", input);
     if (input.trim().toLowerCase() === "clear") {
@@ -81,7 +74,6 @@ function App() {
       console.error("Error: Blockly workspace is not initialized.");
       return;
     }
-
     const allBlocks = workspace.getAllBlocks();
     console.log(`Total Blocks in Workspace: ${allBlocks.length}`);
     if (allBlocks.length === 0) {
@@ -104,17 +96,14 @@ function App() {
         console.warn("No workspace data loaded.");
         return;
       }
-
       try {
         const workspace = Blockly.getMainWorkspace();
         if (!workspace) {
           throw new Error("Blockly workspace not initialized.");
         }
-
         if (!Blockly.Xml) {
           throw new Error("Blockly.Xml is not available. Ensure Blockly is correctly imported.");
         }
-
         const parser = new DOMParser();
         const xmlDom = parser.parseFromString(xmlText, "text/xml");
         workspace.clear();
@@ -138,6 +127,12 @@ function App() {
     else if (dockInfo.edge === "bottom") workspaceStyle.marginBottom = dockInfo.dockSize.height;
   }
 
+  // This callback is passed to ConsolePane so that it can lift its command handler.
+  const handleCommandFromConsole = useCallback((handleCommand) => {
+    console.log("Setting mascot handler:", handleCommand);
+    setMascotHandler(() => handleCommand);
+  }, []);
+
   return (
     <div className="app-container">
       <Header 
@@ -149,34 +144,33 @@ function App() {
       <div className="main-content">
         <div className="left-panel">
           <div className="stage-panel">
-            <ConsolePane />
+            {/* The ConsolePane handles the mascot animations */}
+            <ConsolePane onCommand={handleCommandFromConsole} />
           </div>
           <div className="terminal-panel">
             <div className="terminal-container">
-              <div className="terminal-header">
-                Output Terminal
-              </div>
+              <div className="terminal-header">Output Terminal</div>
               <TerminalPane
                 ref={terminalPaneRef}
                 terminalOutput={terminalOutput}
                 onUserInput={handleUserInput}
                 pendingInputCallback={pendingInputCallback}
-                clearPendingInputCallback={clearPendingInputCallback}
+                clearPendingInputCallback={() => setPendingInputCallback(null)}
               />
               <JSInterpreterRunner
                 ref={interpreterRef}
                 code={generatedCode}
                 setTerminalOutput={setTerminalOutput}
-                onPendingInput={handlePendingInput}
               />
             </div>
           </div>
         </div>
         <div className="workspace-panel" style={workspaceStyle}>
+          {/* Pass the mascotHandler to MainLayout which passes it to WorkspacePane */}
           <MainLayout
             setGeneratedCode={setGeneratedCode}
-            terminalOutput={terminalOutput}
-            onUserInput={handleUserInput}
+            onWorkspaceChange={undefined}
+            onMascotCommand={mascotHandler}
           />
         </div>
       </div>

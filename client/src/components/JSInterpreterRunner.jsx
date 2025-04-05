@@ -2,7 +2,7 @@
 import React, { useImperativeHandle, forwardRef } from "react";
 import Interpreter from "js-interpreter";
 
-const JSInterpreterRunner = forwardRef(({ code, setTerminalOutput }, ref) => {
+const JSInterpreterRunner = forwardRef(({ code, setTerminalOutput, onPendingInput }, ref) => {
   useImperativeHandle(
     ref,
     () => {
@@ -18,6 +18,7 @@ const JSInterpreterRunner = forwardRef(({ code, setTerminalOutput }, ref) => {
           stopRequested = false;
 
           try {
+            // Create an instance of js-interpreter with your code
             const interpreter = new Interpreter(code, (interpreter, scope) => {
               // Create a native function for console.log.
               const logFn = interpreter.createNativeFunction((text) => {
@@ -51,11 +52,20 @@ const JSInterpreterRunner = forwardRef(({ code, setTerminalOutput }, ref) => {
               interpreter.setProperty(windowObj, "alert", alertFn);
               interpreter.setProperty(windowObj, "prompt", promptFn);
 
-              // (Optional) Also override global alert/prompt.
+              // Also override global alert/prompt.
               interpreter.setProperty(scope, "alert", alertFn);
               interpreter.setProperty(scope, "prompt", promptFn);
+
+              // ---- NEW: Inject mascotCommand native function ----
+              // This function will forward the command to window.handleMascotCommand
+              const mascotCommandNative = interpreter.createNativeFunction((command) => {
+                if (window.handleMascotCommand) {
+                  window.handleMascotCommand(command);
+                }
+              });
+              interpreter.setProperty(scope, "mascotCommand", mascotCommandNative);
             });
-            
+
             function step() {
               if (stopRequested) return;
               try {
