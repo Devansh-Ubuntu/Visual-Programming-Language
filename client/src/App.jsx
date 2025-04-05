@@ -1,3 +1,4 @@
+// src/App.jsx
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import Header from "./components/Header";
 import MainLayout from "./layouts/MainLayout";
@@ -9,6 +10,8 @@ import TerminalPane from "./components/TerminalPane";
 import ConsolePane from "./components/ConsolePane"; 
 import "./App.css";
 
+// Import the mascot commands so they get registered globally.
+import "./components/mascotCommands.js";
 function App() {
   const [generatedCode, setGeneratedCode] = useState("");
   const [terminalOutput, setTerminalOutput] = useState("");

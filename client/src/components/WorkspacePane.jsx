@@ -1,3 +1,4 @@
+// src/components/WorkspacePane.jsx
 import React, { useEffect, useRef, useCallback } from "react";
 import * as Blockly from "blockly/core";
 import * as libraryBlocks from "blockly/blocks";
@@ -20,20 +21,10 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange, onM
 
   const updateCode = useCallback(() => {
     if (workspaceRef.current && javascriptGenerator.workspaceToCode) {
+      // Generate code directly without wrapping it with a local mascotCommand function.
       const code = javascriptGenerator.workspaceToCode(workspaceRef.current);
-      // Wrap the generated code with the mascotCommand helper.
-      const wrappedCode = `
-        function mascotCommand(command) {
-          if (window.handleMascotCommand) {
-            window.handleMascotCommand(command);
-          } else {
-            console.log("Mascot handler not set");
-          }
-        }
-        ${code}
-      `;
-      console.log("WorkspacePane: Generated Code:", wrappedCode);
-      setGeneratedCode(wrappedCode);
+      console.log("WorkspacePane: Generated Code:", code);
+      setGeneratedCode(code);
     } else {
       console.error("Code generation is not available.");
     }
@@ -100,7 +91,7 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange, onM
         Blockly.Xml.domToWorkspace(xmlDom, workspaceRef.current);
       }
 
-      // --- Delay calling updateCode by 200ms ---
+      // Delay calling updateCode by 200ms to allow initial layout.
       const timer = setTimeout(() => {
         updateCode();
       }, 200);
