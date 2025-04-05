@@ -121,35 +121,29 @@ html, body, #root {
 
 /* Console pane */
 .console-pane {
+  position: absolute;
+  bottom: 30px;
+  right: 50px;
+  width: 380px;
+  height: 320px;
   background: white;
+  border: 2px solid var(--scratch-header);
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  width: 100%;
-}
-
-.console-pane-header {
-  background-color: transparent;
-  padding: 0;
-  height: 0;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  text-align: left;
-  margin-bottom: 0;
-}
-
-.mascot-container {
-  flex: 1;
-  position: relative;
+  padding: 10px;
+  text-align: center;
   overflow: hidden;
   display: flex;
-  justify-content: center;
   align-items: center;
-  height: 100%;
-  width: 100%;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.mascot {
+  position: relative;
+  width: 200px;
+  height: auto;
+  cursor: grab;
+  z-index: 1;
 }
 
 /* Terminal styling */
@@ -229,33 +223,6 @@ html, body, #root {
   padding: 10px;
   box-sizing: border-box;
   border-radius: 8px;
-}
-
-/* Console pane */
-.console-pane {
-  position: absolute;
-  bottom: 50px;
-  right: 50px;
-  width: 300px;
-  height: 250px;
-  background: white;
-  border: 2px solid var(--scratch-header);
-  border-radius: 8px;
-  padding: 10px;
-  text-align: center;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.mascot {
-  position: relative;
-  width: 120px;
-  height: auto;
-  cursor: grab;
-  z-index: 1;
 }
 
 /* Split panes */
