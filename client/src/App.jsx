@@ -13,14 +13,18 @@ import "./App.css";
 function App() {
   const [generatedCode, setGeneratedCode] = useState("");
   const [terminalOutput, setTerminalOutput] = useState("");
+<<<<<<< HEAD
   const [workspaceState, setWorkspaceState] = useState(null);
+=======
+  const [dockInfo, setDockInfo] = useState({ docked: false, edge: null, dockSize: {} });
+>>>>>>> ea0347fc2ba36603b32e0408d98cf1b7a0e5d7b1
 
   const interpreterRef = useRef(null);
   const terminalPaneRef = useRef(null);
   const workspaceRef = useRef(null);
 
+  // Inject Blockly workspace on mount.
   useEffect(() => {
-    // Inject Blockly into the workspace.
     const workspace = Blockly.inject("blocklyDiv", {
       toolbox: document.getElementById("toolbox"),
     });
@@ -29,10 +33,14 @@ function App() {
     return () => workspace.dispose();
   }, []);
 
+<<<<<<< HEAD
   const clearTerminal = () => {
     setTerminalOutput("");
   };
 
+=======
+  // Run button handler: call the interpreter's runCode method.
+>>>>>>> ea0347fc2ba36603b32e0408d98cf1b7a0e5d7b1
   const handleRun = () => {
     console.log("Run button clicked");
     clearTerminal();
@@ -45,6 +53,7 @@ function App() {
     }, 100);
   };
 
+  // Stop button handler.
   const handleStop = () => {
     console.log("Stop clicked");
     if (interpreterRef.current) {
@@ -52,13 +61,22 @@ function App() {
     }
   };
 
+  // User input coming from the TerminalPane.
   const handleUserInput = (input) => {
     console.log("User input:", input);
+<<<<<<< HEAD
     if (input.trim().toLowerCase() === "clear") {
       clearTerminal();
       return;
     }
     setTerminalOutput(prev => prev + "\r\nUser input: " + input);
+=======
+    setTerminalOutput((prev) => prev + "\r\nUser input: " + input);
+    // Forward input to interpreter if available.
+    if (interpreterRef.current && interpreterRef.current.handleUserInput) {
+      interpreterRef.current.handleUserInput(input);
+    }
+>>>>>>> ea0347fc2ba36603b32e0408d98cf1b7a0e5d7b1
   };
 
   const handleSave = () => {
@@ -75,7 +93,6 @@ function App() {
       console.warn("Warning: No blocks in the workspace to save.");
       return;
     }
-
     try {
       const xmlDom = Blockly.Xml.workspaceToDom(workspace);
       const xmlText = Blockly.Xml.domToText(xmlDom);
@@ -114,6 +131,21 @@ function App() {
     });
   };
 
+<<<<<<< HEAD
+=======
+  const workspaceStyle = {
+    flex: 1,
+    transition: "all 0.3s ease",
+  };
+
+  if (dockInfo.docked) {
+    if (dockInfo.edge === "left") workspaceStyle.marginLeft = dockInfo.dockSize.width;
+    else if (dockInfo.edge === "right") workspaceStyle.marginRight = dockInfo.dockSize.width;
+    else if (dockInfo.edge === "top") workspaceStyle.marginTop = dockInfo.dockSize.height;
+    else if (dockInfo.edge === "bottom") workspaceStyle.marginBottom = dockInfo.dockSize.height;
+  }
+
+>>>>>>> ea0347fc2ba36603b32e0408d98cf1b7a0e5d7b1
   return (
     <div className="app-container">
       <Header 
