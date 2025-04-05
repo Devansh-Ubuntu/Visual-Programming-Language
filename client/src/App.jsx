@@ -16,6 +16,15 @@ function App() {
   const [workspaceState, setWorkspaceState] = useState(null);
   const [dockInfo, setDockInfo] = useState({ docked: false, edge: null, dockSize: {} });
 
+  // NEW: State to hold a pending input callback for prompt()
+  const [pendingInputCallback, setPendingInputCallback] = useState(null);
+  const handlePendingInput = (callback) => {
+    setPendingInputCallback(() => callback);
+  };
+  const clearPendingInputCallback = () => {
+    setPendingInputCallback(null);
+  };
+
   const interpreterRef = useRef(null);
   const terminalPaneRef = useRef(null);
   const workspaceRef = useRef(null);
@@ -151,11 +160,14 @@ function App() {
                 ref={terminalPaneRef}
                 terminalOutput={terminalOutput}
                 onUserInput={handleUserInput}
+                pendingInputCallback={pendingInputCallback}
+                clearPendingInputCallback={clearPendingInputCallback}
               />
               <JSInterpreterRunner
                 ref={interpreterRef}
                 code={generatedCode}
                 setTerminalOutput={setTerminalOutput}
+                onPendingInput={handlePendingInput}
               />
             </div>
           </div>

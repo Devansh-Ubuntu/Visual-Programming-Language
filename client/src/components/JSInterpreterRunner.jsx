@@ -1,3 +1,4 @@
+// src/components/JSInterpreterRunner.jsx
 import React, { useImperativeHandle, forwardRef } from "react";
 import Interpreter from "js-interpreter";
 
@@ -18,37 +19,45 @@ const JSInterpreterRunner = forwardRef(({ code, setTerminalOutput }, ref) => {
 
           try {
             const interpreter = new Interpreter(code, (interpreter, scope) => {
-              // Create a native function for console.log
+              // Create a native function for console.log.
               const logFn = interpreter.createNativeFunction((text) => {
                 setTerminalOutput((prev) => prev + String(text) + "\r\n");
               });
-              interpreter.setProperty(scope, "console", interpreter.createObject(null));
-              interpreter.setProperty(scope.properties.console, "log", logFn);
-              
-              // Create a native function for alert
+              const consoleObj = interpreter.createObject(null);
+              interpreter.setProperty(scope, "console", consoleObj);
+              interpreter.setProperty(consoleObj, "log", logFn);
+
+              // Create a native function for alert.
               const alertFn = interpreter.createNativeFunction((text) => {
                 setTerminalOutput((prev) => prev + String(text) + "\r\n");
               });
               interpreter.setProperty(scope, "alert", alertFn);
 
-              // Create a native function for delay
+              // Create a native function for delay.
               const delayFn = interpreter.createAsyncFunction((ms, callback) => {
                 setTimeout(callback, ms);
               });
               interpreter.setProperty(scope, "delay", delayFn);
 
-              // Create a native function for getInput
-              const getInputFn = interpreter.createAsyncFunction((callback) => {
-                const userInput = window.prompt("Enter input:");
+              // Create a native function for prompt that uses the browser popup.
+              const promptFn = interpreter.createAsyncFunction((promptMsg, callback) => {
+                const userInput = window.prompt(promptMsg || "Enter input:");
                 callback(userInput);
               });
-              interpreter.setProperty(scope, "getInput", getInputFn);
+              interpreter.setProperty(scope, "prompt", promptFn);
+
+              // Override window.alert and window.prompt on the global window object.
+              const windowObj = interpreter.getProperty(scope, "window");
+              interpreter.setProperty(windowObj, "alert", alertFn);
+              interpreter.setProperty(windowObj, "prompt", promptFn);
+
+              // (Optional) Also override global alert/prompt.
+              interpreter.setProperty(scope, "alert", alertFn);
+              interpreter.setProperty(scope, "prompt", promptFn);
             });
             
             function step() {
-              if (stopRequested) {
-                return;
-              }
+              if (stopRequested) return;
               try {
                 if (interpreter.step()) {
                   setTimeout(step, 1);

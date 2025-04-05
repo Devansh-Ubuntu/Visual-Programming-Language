@@ -25,6 +25,7 @@ const toolbox = {
         { kind: "block", type: "logic_compare" },
         { kind: "block", type: "logic_operation" },
         { kind: "block", type: "logic_boolean" },
+        { kind: "block", type: "logic_null" },
         { kind: "block", type: "logic_negate" }
       ]
     },
@@ -50,6 +51,8 @@ const toolbox = {
         { kind: "block", type: "math_arithmetic" },
         { kind: "block", type: "math_single" },
         { kind: "block", type: "math_trig" },
+        { kind: "block", type: "math_pi" },
+        { kind: "block", type: "math_isEven" },
         { kind: "block", type: "math_round" },
         { kind: "block", type: "math_modulo" },
         { kind: "block", type: "math_random_int" },
@@ -64,10 +67,13 @@ const toolbox = {
       contents: [
         { kind: "block", type: "text" },
         { kind: "block", type: "text_print" },
-        { kind: "block", type: "input_block" },
+        { kind: "block", type: "text_prompt" },
         { kind: "block", type: "text_join" },
         { kind: "block", type: "text_length" },
         { kind: "block", type: "text_isEmpty" },
+        { kind: "block", type: "text_replace" },
+        { kind: "block", type: "text_count" },
+        { kind: "block", type: "text_reverse" },
         { kind: "block", type: "text_indexOf" },
         { kind: "block", type: "text_charAt" },
         { kind: "block", type: "text_getSubstring" },
@@ -83,10 +89,11 @@ const toolbox = {
       contents: [
         { kind: "block", type: "lists_create_empty" },
         { kind: "block", type: "lists_create_with" },
-        { kind: "block", type: "lists_repeat" },
-        { kind: "block", type: "lists_length" },
+        // { kind: "block", type: "lists_repeat" },
+        // { kind: "block", type: "lists_length" },
         { kind: "block", type: "lists_isEmpty" },
         { kind: "block", type: "lists_indexOf" },
+        { kind: "block", type: "lists_sum" },
         { kind: "block", type: "get_list_element_safely" },
         { kind: "block", type: "lists_getIndex" },
         { kind: "block", type: "lists_setIndex" },
@@ -110,36 +117,5 @@ const toolbox = {
     },
   ]
 };
-
-// Dynamic fallback: add any extra blocks not already in the static toolbox.
-const staticTypes = new Set();
-toolbox.contents.forEach(cat => {
-  if (cat.contents) {
-    cat.contents.forEach(block => staticTypes.add(block.type));
-  }
-});
-
-const extras = [];
-Object.keys(Blockly.Blocks).forEach(type => {
-  if (!staticTypes.has(type)) {
-    if (
-      type.startsWith("logic_") ||
-      type.startsWith("controls_") ||
-      type.startsWith("math_") ||
-      type.startsWith("text_") ||
-      type.startsWith("lists_")
-    ) {
-      extras.push({ kind: "block", type });
-    }
-  }
-});
-if (extras.length) {
-  toolbox.contents.push({
-    kind: "category",
-    name: "Extras",
-    colour: "#999999",
-    contents: extras
-  });
-}
 
 export default toolbox;
