@@ -5,9 +5,6 @@ import { javascriptGenerator } from "blockly/javascript";
 // --- Block Definitions ---
 
 // Input Block
-
-
-
 Blockly.Blocks["input_block"] = {
   init: function () {
     this.appendDummyInput()
@@ -15,7 +12,8 @@ Blockly.Blocks["input_block"] = {
     this.setOutput(true, "String");
     this.setColour(150);
     this.setTooltip("Asks user for input from a prompt or terminal.");
-    this.setHelpUrl("");
+    // Link to MDN documentation for window.prompt.
+    this.setHelpUrl("https://developer.mozilla.org/en-US/docs/Web/API/Window/prompt");
   },
 };
 
@@ -31,9 +29,11 @@ Blockly.Blocks["delay_block"] = {
     this.setNextStatement(true, null);
     this.setColour(120);
     this.setTooltip("Pauses execution for a given time.");
-    this.setHelpUrl("");
+    // Link to MDN documentation on setTimeout.
+    this.setHelpUrl("https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setTimeout");
   },
 };
+
 // Get List Element Safely Block
 Blockly.Blocks["get_list_element_safely"] = {
   init: function () {
@@ -47,8 +47,10 @@ Blockly.Blocks["get_list_element_safely"] = {
 
     this.setOutput(true, null);
     this.setColour(240);
-    this.setTooltip("Gets an element from a list, but throws an error for negative or zero index.");
-    this.setHelpUrl("");
+    // Updated tooltip for clarity.
+    this.setTooltip("Gets an element from a list safely. Throws an error for invalid (negative or zero) index values.");
+    // Link to MDN documentation on JavaScript Arrays.
+    this.setHelpUrl("https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array");
   }
 };
 
@@ -56,21 +58,18 @@ Blockly.Blocks["get_list_element_safely"] = {
 // For Blockly 11.2.1, custom generators should be registered on javascriptGenerator.forBlock.
 
 // Generator for Input Block
-
-
-
 javascriptGenerator.forBlock["input_block"] = function(block) {
-  // Generate code that calls getInput(), no 'await' keyword
+  // Generate code that calls getInput(), no 'await' keyword.
   const code = "getInput()";
-  // Return it as a value block
+  // Return it as a value block.
   return [code, javascriptGenerator.ORDER_FUNCTION_CALL];
 };
 
 // Generator for Delay Block
 javascriptGenerator.forBlock['delay_block'] = function(block) {
-  // IMPORTANT: Must match "DELAY_TIME" from the block definition
+  // IMPORTANT: Must match "DELAY_TIME" from the block definition.
   const delayTime = block.getFieldValue('DELAY_TIME') || 1;
-  // Multiply by 1000 to convert seconds to ms
+  // Multiply by 1000 to convert seconds to ms.
   const code = `delay(${delayTime * 1000});\n`;
   return code;
 };

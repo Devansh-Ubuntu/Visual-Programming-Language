@@ -51,8 +51,6 @@ const toolbox = {
         { kind: "block", type: "math_arithmetic" },
         { kind: "block", type: "math_single" },
         { kind: "block", type: "math_trig" },
-        { kind: "block", type: "math_pi" },
-        { kind: "block", type: "math_isEven" },
         { kind: "block", type: "math_round" },
         { kind: "block", type: "math_modulo" },
         { kind: "block", type: "math_random_int" },
@@ -78,8 +76,7 @@ const toolbox = {
         { kind: "block", type: "text_charAt" },
         { kind: "block", type: "text_getSubstring" },
         { kind: "block", type: "text_changeCase" },
-        { kind: "block", type: "text_trim" },
-        { kind: "block", type: "text_prompt" }
+        { kind: "block", type: "text_trim" }
       ]
     },
     {
@@ -90,10 +87,9 @@ const toolbox = {
         { kind: "block", type: "lists_create_empty" },
         { kind: "block", type: "lists_create_with" },
         // { kind: "block", type: "lists_repeat" },
-        // { kind: "block", type: "lists_length" },
+        { kind: "block", type: "lists_length" },
         { kind: "block", type: "lists_isEmpty" },
         { kind: "block", type: "lists_indexOf" },
-        { kind: "block", type: "lists_sum" },
         { kind: "block", type: "get_list_element_safely" },
         { kind: "block", type: "lists_getIndex" },
         { kind: "block", type: "lists_setIndex" },
