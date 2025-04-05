@@ -8,6 +8,7 @@ import { saveWorkspace } from "./components/SaveWorkspace";
 import { loadWorkspace } from "./components/LoadWorkspace";
 import TerminalPane from "./components/TerminalPane";
 import ConsolePane from "./components/ConsolePane"; 
+import ChatWidget from "./components/ChatWidget";
 import "./App.css";
 
 // Import the mascot commands so they get registered globally.
@@ -147,9 +148,9 @@ function App() {
       <div className="main-content">
         <div className="left-panel">
           <div className="stage-panel">
-            {/* The ConsolePane handles the mascot animations */}
             <ConsolePane onCommand={handleCommandFromConsole} />
           </div>
+  
           <div className="terminal-panel">
             <div className="terminal-container">
               <div className="terminal-header">Output Terminal</div>
@@ -167,9 +168,14 @@ function App() {
               />
             </div>
           </div>
+  
+          {/* Removed old ChatBase Chatbot panel */}
+          {/* <div className="chatbot-panel" style={{ marginTop: "1rem" }}>
+            <iframe ... />
+          </div> */}
         </div>
+  
         <div className="workspace-panel" style={workspaceStyle}>
-          {/* Pass the mascotHandler to MainLayout which passes it to WorkspacePane */}
           <MainLayout
             setGeneratedCode={setGeneratedCode}
             onWorkspaceChange={undefined}
@@ -177,8 +183,11 @@ function App() {
           />
         </div>
       </div>
+      {/* Render the ChatWidget at the root level so it overlays the app */}
+      <ChatWidget />
     </div>
   );
+  
 }
 
 export default App;
