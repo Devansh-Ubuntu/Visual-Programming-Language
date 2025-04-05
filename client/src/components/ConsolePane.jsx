@@ -1,4 +1,4 @@
-//src/components/ConsolePane.jsx
+// src/components/ConsolePane.jsx
 import React, { useRef, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 
@@ -50,7 +50,8 @@ const ConsolePane = ({ onCommand }) => {
     degrees: 0,
     message: "",
     rotation: 0,
-    isFlipping: false
+    isFlipping: false,
+    turned: false // Added property to track horizontal flip.
   });
   const [isSpeaking, setIsSpeaking] = useState(false);
 
@@ -196,9 +197,42 @@ const ConsolePane = ({ onCommand }) => {
             degrees: 0,
             message: "",
             rotation: 0,
-            isFlipping: false
+            isFlipping: false,
+            turned: false
           });
           setIsSpeaking(false);
+          break;
+        case "turnAround":
+          // Toggle horizontal flip.
+          setAnimation(prev => ({
+            ...prev,
+            turned: !prev.turned
+          }));
+          break;
+        case "crossRoad":
+          // Sequence: reset position, rotate -15°, walk 10 steps, then rotate back to normal.
+          setPosition(initialPosition.current);
+          setAnimation(prev => ({
+            ...prev,
+            rotation: -15
+          }));
+          // After a short delay, initiate walk.
+          setTimeout(() => {
+            setAnimation(prev => ({
+              ...prev,
+              type: ANIMATION_TYPES.WALK,
+              frameIndex: 0,
+              steps: 10
+            }));
+            // After the walk, rotate back to normal.
+            setTimeout(() => {
+              setAnimation(prev => ({
+                ...prev,
+                rotation: 0,
+                type: ANIMATION_TYPES.IDLE
+              }));
+            }, 10 * currentSprite.frameDuration + 200);
+          }, 500);
           break;
         default:
           setAnimation(prev => ({
@@ -215,7 +249,7 @@ const ConsolePane = ({ onCommand }) => {
     // Pass our command handler upward.
     onCommand(handleCommand);
     return () => clearTimeout(speakTimeoutRef.current);
-  }, [onCommand]);
+  }, [onCommand, currentSprite.frameDuration]);
 
   // Drag handlers for repositioning the mascot.
   const handleMouseDown = (e) => {
@@ -253,7 +287,7 @@ const ConsolePane = ({ onCommand }) => {
             backgroundPosition: `-${animation.frameIndex * frameWidth}px 0`,
             backgroundSize: `${currentSprite.width}px ${currentSprite.height}px`,
             cursor: "grab",
-            transform: `scaleX(${animation.steps < 0 ? -1 : 1}) rotate(${animation.rotation}deg)`,
+            transform: `scaleX(${animation.turned ? -1 : 1}) rotate(${animation.rotation}deg)`,
             transformOrigin: "center center",
             transition: animation.isFlipping || animation.degrees ? "none" : "transform 0.1s ease"
           }}

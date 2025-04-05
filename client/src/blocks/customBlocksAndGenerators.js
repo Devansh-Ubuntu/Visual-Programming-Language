@@ -115,6 +115,22 @@ Blockly.defineBlocksWithJsonArray([
     colour: 15,
     tooltip: "Reset the mascot to its starting position",
   },
+  {
+    type: "mascot_turn_around",
+    message0: "turn around",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 15,
+    tooltip: "Flip the spirit horizontally",
+  },
+  {
+    type: "mascot_cross_road",
+    message0: "cross the road",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 15,
+    tooltip: "Make the mascot cross the road",
+  }
 ]);
 
 javascriptGenerator.forBlock["mascot_walk"] = function (block) {
@@ -140,5 +156,16 @@ javascriptGenerator.forBlock["mascot_speak"] = function (block) {
 javascriptGenerator.forBlock["mascot_reset"] = function () {
   return `mascotCommand({ action: 'reset' });\n`;
 };
+
+javascriptGenerator.forBlock["mascot_turn_around"] = function () {
+  return `mascotCommand({ action: 'turnAround' });\n`;
+};
+
+// Generator for new block: Cross the Road
+javascriptGenerator.forBlock["mascot_cross_road"] = function () {
+  return `mascotCommand({ action: 'crossRoad' });\n`;
+};
+
+
 
 // No need to export anything special—just import this file once for side effects.

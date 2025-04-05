@@ -89,6 +89,16 @@ const JSInterpreterRunner = forwardRef(({ code, setTerminalOutput, onPendingInpu
                         window.mascotReset();
                       }
                       break;
+                    case "turnAround":
+                    if (window.mascotTurnAround) {
+                      window.mascotTurnAround();
+                    }
+                    break;
+                    case "crossRoad":
+                    if (window.mascotCrossRoad) {
+                      window.mascotCrossRoad();
+                    }
+                    break;
                     default:
                       console.error("Unknown mascot command", nativeCommand);
                   }

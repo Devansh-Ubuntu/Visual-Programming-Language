@@ -39,16 +39,31 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange, onM
     }
   }, [setGeneratedCode, onWorkspaceChange]);
 
-  // NEW: Set the global mascot command handler.
   useEffect(() => {
     if (onMascotCommand) {
       window.handleMascotCommand = onMascotCommand;
-      console.log("Global mascot handler set:", onMascotCommand);
+
+      window.mascotTurnAround = function() {
+        if (window.handleMascotCommand) {
+          window.handleMascotCommand({ action: "turnAround" });
+        }
+      };
+  
+      window.mascotCrossRoad = function() {
+        if (window.handleMascotCommand) {
+          window.handleMascotCommand({ action: "crossRoad" });
+        }
+      };
+  
+      console.log("Global mascot handler and functions set:", onMascotCommand);
     }
     return () => {
       delete window.handleMascotCommand;
+      delete window.mascotTurnAround;
+      delete window.mascotCrossRoad;
     };
   }, [onMascotCommand]);
+  
 
   useEffect(() => {
     if (blocklyDiv.current) {

@@ -10,6 +10,8 @@ const toolbox = {
       colour: "#a66e5b",  // Blue color for mascot category
       contents: [
         { kind: "block", type: "mascot_walk" },
+        { kind: "block", type: "mascot_turn_around" },
+        { kind: "block", type: "mascot_cross_road" },
         { kind: "block", type: "mascot_flip" },
         { kind: "block", type: "mascot_rotate" },
         { kind: "block", type: "mascot_speak" },
