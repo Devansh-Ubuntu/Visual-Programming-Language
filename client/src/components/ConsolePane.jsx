@@ -427,7 +427,7 @@ const ConsolePane = ({ onCommand }) => {
             style={{
               position: "absolute",
               left: position.x + frameWidth / 2,
-              top: position.y - 80,
+              top: position.y - 40,
               transform: "translateX(-50%)",
               zIndex: 1000
             }}
