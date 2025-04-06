@@ -182,28 +182,45 @@ const ConsolePane = ({ onCommand }) => {
   useEffect(() => {
     if (animation.degrees === 0) return;
     const target = Number(animation.degrees);
-    const speed = target > 0 ? 5 : -5;
+    
+    // Store the initial rotation value
+    const initialRotation = animation.rotation;
+    
+    // Calculate the number of steps based on the target angle
+    // Use more steps for larger angles to ensure smooth animation
+    const totalSteps = Math.max(10, Math.abs(target) / 5);
+    const speed = target / totalSteps;
+    
     let rotated = 0;
     const rotateStep = () => {
       rotated += speed;
+      
+      // Check if we've reached or exceeded the target rotation
       if (Math.abs(rotated) >= Math.abs(target)) {
+        // Set the final rotation value exactly to the target
         setAnimation(prev => ({
           ...prev,
           degrees: 0,
-          rotation: prev.rotation + target
+          rotation: initialRotation + target // Use initial rotation + target for exact positioning
         }));
         clearInterval(rotateAnimationRef.current);
         if (animation.onComplete) {
           animation.onComplete();
         }
       } else {
+        // Apply the incremental rotation
         setAnimation(prev => ({
           ...prev,
-          rotation: prev.rotation + speed
+          rotation: initialRotation + rotated // Use initial rotation + current rotated amount
         }));
       }
     };
-    rotateAnimationRef.current = setInterval(rotateStep, 16);
+    
+    // Adjust interval timing based on the total steps
+    // Faster for smaller angles, slower for larger angles
+    const intervalTime = Math.max(10, 200 / totalSteps);
+    rotateAnimationRef.current = setInterval(rotateStep, intervalTime);
+    
     return () => clearInterval(rotateAnimationRef.current);
   }, [animation.degrees, animation.onComplete]);
 
