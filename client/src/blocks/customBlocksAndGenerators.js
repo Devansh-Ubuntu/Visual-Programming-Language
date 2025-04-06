@@ -112,9 +112,8 @@ Blockly.defineBlocksWithJsonArray([
     "message0": "say %1 for %2 seconds",
     "args0": [
       {
-        "type": "field_input",
+        "type": "input_value",
         "name": "MESSAGE",
-        "text": "Hello!"
       },
       {
         "type": "field_number",
@@ -127,7 +126,7 @@ Blockly.defineBlocksWithJsonArray([
     "nextStatement": null,
     "colour": 15,
     "tooltip": "Make the mascot say something for a given number of seconds"
-  },
+  },  
   {
     "type": "mascot_reset",
     "message0": "reset position",
@@ -190,9 +189,9 @@ javascriptGenerator.forBlock["mascot_rotate"] = function (block) {
 };
 
 javascriptGenerator.forBlock["mascot_speak"] = function (block) {
-  const msg = block.getFieldValue("MESSAGE") || "''";
+  const msg = javascriptGenerator.valueToCode(block, "MESSAGE", javascriptGenerator.ORDER_ATOMIC) || "''";
   const dur = block.getFieldValue("DURATION") || "1";
-  return `mascotCommand({ action: 'speak', message: ${JSON.stringify(msg)}, duration: ${dur} });\n`;
+  return `mascotCommand({ action: 'speak', message: ${msg}, duration: ${dur} });\n`;
 };
 
 javascriptGenerator.forBlock["mascot_reset"] = function () {
