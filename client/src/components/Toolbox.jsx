@@ -89,7 +89,6 @@ const toolbox = {
       contents: [
         { kind: "block", type: "lists_create_empty" },
         { kind: "block", type: "lists_create_with" },
-        // { kind: "block", type: "lists_repeat" },
         { kind: "block", type: "lists_length" },
         { kind: "block", type: "lists_isEmpty" },
         { kind: "block", type: "lists_indexOf" },

@@ -234,24 +234,23 @@ const ConsolePane = ({ onCommand }) => {
             }, 10 * currentSprite.frameDuration + 200);
           }, 500);
           break;
-        case "stop":
-          clearInterval(animationRef.current);
-          clearInterval(flipAnimationRef.current);
-          clearInterval(rotateAnimationRef.current);
-          clearTimeout(speakTimeoutRef.current);
-          setPosition(initialPosition.current);
-          setAnimation({
-            type: ANIMATION_TYPES.IDLE,
-            frameIndex: 0,
-            steps: 0,
-            degrees: 0,
-            message: "",
-            rotation: 0,
-            isFlipping: false,
-            turned: false
-          });
-          setIsSpeaking(false);
-          break;
+          case "stop":
+            clearInterval(flipAnimationRef.current);
+            clearInterval(rotateAnimationRef.current);
+            clearTimeout(speakTimeoutRef.current);
+            setPosition(initialPosition.current);
+            setAnimation({
+              type: ANIMATION_TYPES.IDLE,
+              frameIndex: 0,
+              steps: 0,
+              degrees: 0,
+              message: "",
+              rotation: 0,
+              isFlipping: false,
+              turned: false
+            });
+            setIsSpeaking(false);
+            break;
           case "setPosition":
             // NEW: Set the mascot's position directly.
             setPosition({ x: Number(command.x), y: Number(command.y) });
