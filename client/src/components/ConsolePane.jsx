@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 // Import sprite sheets and assets
 import idleSprite from "../assets/idle.png";
 import walkSprite from "../assets/walk.png";
+import backgroundImage from "../assets/download.jpg";
 
 const ANIMATION_TYPES = {
   IDLE: "idle",
@@ -34,15 +35,15 @@ const SPRITE_CONFIG = {
   speak: {
     img: idleSprite,
     frameCount: 4,
-    width: 300,
-    height: 200,
+    width: 150,
+    height: 100,
     loop: true,
     frameDuration: 120
   }
 };
 
 const ConsolePane = ({ onCommand }) => {
-  const [position, setPosition] = useState({ x: 50, y: 50 });
+  const [position, setPosition] = useState({ x: 50, y: 150 });
   const [animation, setAnimation] = useState({
     type: ANIMATION_TYPES.IDLE,
     frameIndex: 0,
@@ -62,17 +63,30 @@ const ConsolePane = ({ onCommand }) => {
   const flipAnimationRef = useRef(null);
   const rotateAnimationRef = useRef(null);
   const speakTimeoutRef = useRef(null);
-  const initialPosition = useRef({ x: 50, y: 50 });
+  const initialPosition = useRef({ x: 50, y: 150 });
 
   const currentSprite = SPRITE_CONFIG[animation.type] || SPRITE_CONFIG.idle;
   const frameWidth = currentSprite.width / currentSprite.frameCount;
   const frameHeight = currentSprite.height;
-
+  
+  // Use preserved dimensions for speak animation if available
+  const spriteWidth = animation.type === ANIMATION_TYPES.SPEAK && animation.spriteWidth 
+    ? animation.spriteWidth 
+    : currentSprite.width;
+  
+  const spriteHeight = animation.type === ANIMATION_TYPES.SPEAK && animation.spriteHeight 
+    ? animation.spriteHeight 
+    : currentSprite.height;
+  
   // Animation loop for frame updates.
   useEffect(() => {
     let stepsCompleted = 0;
     const animate = () => {
       setAnimation(prev => {
+        // Create a new animation state object to avoid mutation
+        let newState = { ...prev };
+        
+        // Handle different animation types
         if (prev.type === ANIMATION_TYPES.WALK && prev.steps !== 0) {
           const direction = Number(prev.steps) > 0 ? 1 : -1;
           
@@ -97,20 +111,39 @@ const ConsolePane = ({ onCommand }) => {
           if (prev.frameIndex === currentSprite.frameCount - 1) {
             stepsCompleted++;
             if (stepsCompleted >= Math.abs(Number(prev.steps))) {
-              return { ...prev, type: ANIMATION_TYPES.IDLE, frameIndex: 0, steps: 0 };
+              newState = { 
+                ...newState, 
+                type: ANIMATION_TYPES.IDLE, 
+                frameIndex: 0, 
+                steps: 0 
+              };
             }
           }
         }
-        if (prev.type === ANIMATION_TYPES.SPEAK && !currentSprite.loop && prev.frameIndex === currentSprite.frameCount - 1) {
-          setIsSpeaking(false);
-          return { ...prev, type: ANIMATION_TYPES.IDLE, frameIndex: 0, message: "" };
+        
+        // Update frame index for all animation types
+        if (newState.type !== ANIMATION_TYPES.IDLE || newState.frameIndex > 0) {
+          newState.frameIndex = (newState.frameIndex + 1) % currentSprite.frameCount;
         }
-        const nextIndex = (prev.frameIndex + 1) % currentSprite.frameCount;
-        return { ...prev, frameIndex: nextIndex };
+        
+        return newState;
       });
     };
+    
+    // Clear any existing animation interval
+    if (animationRef.current) {
+      clearInterval(animationRef.current);
+    }
+    
+    // Set up a new animation interval
     animationRef.current = setInterval(animate, currentSprite.frameDuration);
-    return () => clearInterval(animationRef.current);
+    
+    // Clean up on unmount or when dependencies change
+    return () => {
+      if (animationRef.current) {
+        clearInterval(animationRef.current);
+      }
+    };
   }, [animation.type, currentSprite.frameCount, currentSprite.frameDuration, currentSprite.loop]);
 
   // Flip animation effect.
@@ -174,96 +207,103 @@ const ConsolePane = ({ onCommand }) => {
     if (!onCommand) return;
     const handleCommand = (command) => {
       console.log("ConsolePane received command:", command);
-      switch (command.action) {
-        case "walk": {
-          const steps = Number(command.value) || 0;
-          setAnimation(prev => ({
-            ...prev,
-            type: ANIMATION_TYPES.WALK,
-            frameIndex: 0,
-            steps: steps
-          }));
-          break;
-        }
-        case "flip":
-          setAnimation(prev => ({
-            ...prev,
-            type: ANIMATION_TYPES.IDLE,
-            isFlipping: true
-          }));
-          break;
-        case "rotate":
-          setAnimation(prev => ({
-            ...prev,
-            type: ANIMATION_TYPES.IDLE,
-            degrees: Number(command.value) || 0
-          }));
-          break;
-        case "speak":
-          clearTimeout(speakTimeoutRef.current);
-          setAnimation(prev => ({
-            ...prev,
-            type: ANIMATION_TYPES.SPEAK,
-            frameIndex: 0,
-            message: command.message
-          }));
-          setIsSpeaking(true);
-          speakTimeoutRef.current = setTimeout(() => {
-            setIsSpeaking(false);
-            setAnimation(prev => ({
-              ...prev,
-              type: ANIMATION_TYPES.IDLE,
-              frameIndex: 0,
-              message: ""
-            }));
-          }, (command.duration || 1) * 1000);
-          break;
-        case "reset":
-          setPosition(initialPosition.current);
-          setAnimation({
-            type: ANIMATION_TYPES.IDLE,
-            frameIndex: 0,
-            steps: 0,
-            degrees: 0,
-            message: "",
-            rotation: 0,
-            isFlipping: false,
-            turned: false
-          });
-          setIsSpeaking(false);
-          break;
-        case "turnAround":
-          // Toggle horizontal flip
-          setAnimation(prev => ({
-            ...prev,
-            turned: !prev.turned
-          }));
-          break;
-        case "crossRoad":
-          // Sequence: reset position, rotate -15°, walk 10 steps, then rotate back to normal.
-          setPosition(initialPosition.current);
-          setAnimation(prev => ({
-            ...prev,
-            rotation: -15
-          }));
-          // After a short delay, initiate walk.
-          setTimeout(() => {
+      
+      // Create a queue for commands to prevent animation disruption
+      const executeCommand = () => {
+        switch (command.action) {
+          case "walk": {
+            const steps = Number(command.value) || 0;
             setAnimation(prev => ({
               ...prev,
               type: ANIMATION_TYPES.WALK,
               frameIndex: 0,
-              steps: 10
+              steps: steps
             }));
-            // After the walk, rotate back to normal.
+            break;
+          }
+          case "flip":
+            setAnimation(prev => ({
+              ...prev,
+              type: ANIMATION_TYPES.IDLE,
+              isFlipping: true
+            }));
+            break;
+          case "rotate":
+            setAnimation(prev => ({
+              ...prev,
+              type: ANIMATION_TYPES.IDLE,
+              degrees: Number(command.value) || 0
+            }));
+            break;
+          case "speak":
+            clearTimeout(speakTimeoutRef.current);
+            
+            // Keep the sprite in idle animation state while displaying the speech bubble
+            setAnimation(prev => ({
+              ...prev,
+              type: ANIMATION_TYPES.IDLE, // Keep in idle state
+              frameIndex: 0,
+              message: command.message
+            }));
+            
+            setIsSpeaking(true);
+            
+            // Ensure the speech bubble stays visible for the specified duration
+            const duration = Number(command.duration) || 1;
+            speakTimeoutRef.current = setTimeout(() => {
+              setIsSpeaking(false);
+              setAnimation(prev => ({
+                ...prev,
+                message: ""
+              }));
+            }, duration * 1000);
+            break;
+          case "reset":
+            setPosition(initialPosition.current);
+            setAnimation({
+              type: ANIMATION_TYPES.IDLE,
+              frameIndex: 0,
+              steps: 0,
+              degrees: 0,
+              message: "",
+              rotation: 0,
+              isFlipping: false,
+              turned: false
+            });
+            setIsSpeaking(false);
+            break;
+          case "turnAround":
+            // Toggle horizontal flip
+            setAnimation(prev => ({
+              ...prev,
+              turned: !prev.turned
+            }));
+            break;
+          case "crossRoad":
+            // Sequence: reset position, rotate -15°, walk 10 steps, then rotate back to normal.
+            setPosition(initialPosition.current);
+            setAnimation(prev => ({
+              ...prev,
+              rotation: -15
+            }));
+            // After a short delay, initiate walk.
             setTimeout(() => {
               setAnimation(prev => ({
                 ...prev,
-                rotation: 0,
-                type: ANIMATION_TYPES.IDLE
+                type: ANIMATION_TYPES.WALK,
+                frameIndex: 0,
+                steps: 10
               }));
-            }, 10 * currentSprite.frameDuration + 200);
-          }, 500);
-          break;
+              // After the walk, rotate back to normal.
+              setTimeout(() => {
+                setAnimation(prev => ({
+                  ...prev,
+                  rotation: 0,
+                  type: ANIMATION_TYPES.IDLE
+                }));
+              }, 10 * currentSprite.frameDuration + 200);
+            }, 500);
+            break;
           case "stop":
             clearInterval(flipAnimationRef.current);
             clearInterval(rotateAnimationRef.current);
@@ -285,16 +325,20 @@ const ConsolePane = ({ onCommand }) => {
             // NEW: Set the mascot's position directly.
             setPosition({ x: Number(command.x), y: Number(command.y) });
             break;
-        default:
-          setAnimation(prev => ({
-            ...prev,
-            type: ANIMATION_TYPES.IDLE,
-            frameIndex: 0,
-            steps: 0,
-            degrees: 0,
-            message: ""
-          }));
-      }
+          default:
+            setAnimation(prev => ({
+              ...prev,
+              type: ANIMATION_TYPES.IDLE,
+              frameIndex: 0,
+              steps: 0,
+              degrees: 0,
+              message: ""
+            }));
+        }
+      };
+      
+      // Execute the command immediately
+      executeCommand();
     };
 
     // Pass our command handler upward.
@@ -319,12 +363,15 @@ const ConsolePane = ({ onCommand }) => {
 
   return (
     <div className="console-pane" onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}>
-      <div className="mascot-container">
-        {isSpeaking && animation.message && (
-          <div className="speech-bubble">
-            {animation.message}
-          </div>
-        )}
+      <div className="mascot-container" style={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat"
+      }}>
         <div
           ref={mascotRef}
           onMouseDown={handleMouseDown}
@@ -340,9 +387,29 @@ const ConsolePane = ({ onCommand }) => {
             cursor: "grab",
             transform: `scaleX(${animation.turned ? -1 : 1}) rotate(${animation.rotation}deg)`,
             transformOrigin: "center center",
-            transition: animation.isFlipping || animation.degrees ? "none" : "transform 0.1s ease"
+            transition: animation.isFlipping || animation.degrees ? "none" : "transform 0.1s ease",
+            // Force consistent dimensions for speak animation
+            ...(animation.type === ANIMATION_TYPES.SPEAK ? {
+              width: SPRITE_CONFIG.idle.width / SPRITE_CONFIG.idle.frameCount,
+              height: SPRITE_CONFIG.idle.height,
+              backgroundSize: `${SPRITE_CONFIG.idle.width}px ${SPRITE_CONFIG.idle.height}px`
+            } : {})
           }}
         />
+        {isSpeaking && animation.message && (
+          <div 
+            className="speech-bubble"
+            style={{
+              position: "absolute",
+              left: position.x + frameWidth / 2,
+              top: position.y - 80,
+              transform: "translateX(-50%)",
+              zIndex: 1000
+            }}
+          >
+            {animation.message}
+          </div>
+        )}
       </div>
     </div>
   );
