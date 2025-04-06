@@ -21,7 +21,6 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange, onM
 
   const updateCode = useCallback(() => {
     if (workspaceRef.current && javascriptGenerator.workspaceToCode) {
-      // Generate code directly without wrapping it with a local mascotCommand function.
       const code = javascriptGenerator.workspaceToCode(workspaceRef.current);
       console.log("WorkspacePane: Generated Code:", code);
       setGeneratedCode(code);
@@ -60,7 +59,7 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange, onM
           window.handleMascotCommand({ action: "setPosition", x, y });
         }
       };
-      
+
       console.log("Global mascot handler and functions set:", onMascotCommand);
     }
     return () => {
@@ -85,7 +84,12 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange, onM
          scaleSpeed: 1.2,
          pinch: true},
         scrollbars: true,
-        
+        grid: {
+          spacing: 20,
+          length: 2,
+          colour: "#8FBC8F",
+          snap: true
+        }
       });
       if (onMascotCommand) {
         window.handleMascotCommand = onMascotCommand;
@@ -104,7 +108,6 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange, onM
 
       workspaceRef.current.addChangeListener(combinedListener);
 
-      // Default block on first load.
       if (workspaceRef.current.getAllBlocks().length === 0) {
         const defaultXML = `
           <xml>
@@ -121,7 +124,6 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange, onM
         Blockly.Xml.domToWorkspace(xmlDom, workspaceRef.current);
       }
 
-      // Delay calling updateCode by 200ms to allow initial layout.
       const timer = setTimeout(() => {
         updateCode();
       }, 200);
