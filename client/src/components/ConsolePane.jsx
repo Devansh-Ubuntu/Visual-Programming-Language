@@ -43,7 +43,7 @@ const SPRITE_CONFIG = {
 };
 
 const ConsolePane = ({ onCommand }) => {
-  const [position, setPosition] = useState({ x: 50, y: 150 });
+  const [position, setPosition] = useState({ x: 20, y: 175 });
   const [animation, setAnimation] = useState({
     type: ANIMATION_TYPES.IDLE,
     frameIndex: 0,
@@ -64,7 +64,7 @@ const ConsolePane = ({ onCommand }) => {
   const flipAnimationRef = useRef(null);
   const rotateAnimationRef = useRef(null);
   const speakTimeoutRef = useRef(null);
-  const initialPosition = useRef({ x: 50, y: 150 });
+  const initialPosition = useRef({ x: 20, y: 175 });
 
   const currentSprite = SPRITE_CONFIG[animation.type] || SPRITE_CONFIG.idle;
   const frameWidth = currentSprite.width / currentSprite.frameCount;
