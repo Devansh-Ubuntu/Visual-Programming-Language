@@ -13,7 +13,8 @@ const JSInterpreterRunner = forwardRef(({ code, setTerminalOutput }, ref) => {
             setTerminalOutput("No code provided!\n");
             return;
           }
-          setTerminalOutput("");
+          // Don't clear the terminal output
+          // setTerminalOutput("");
           stopRequested = false;
 
           try {
