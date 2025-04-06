@@ -262,7 +262,7 @@ const ConsolePane = ({ onCommand }) => {
           clearTimeout(speakTimeoutRef.current);
           setAnimation(prev => ({
             ...prev,
-            type: ANIMATION_TYPES.SPEAK,
+            type: ANIMATION_TYPES.IDLE,
             frameIndex: 0,
             message: command.message,
             onComplete: doneCallback
@@ -272,8 +272,6 @@ const ConsolePane = ({ onCommand }) => {
             setIsSpeaking(false);
             setAnimation(prev => ({
               ...prev,
-              type: ANIMATION_TYPES.IDLE,
-              frameIndex: 0,
               message: "",
               onComplete: null
             }));
