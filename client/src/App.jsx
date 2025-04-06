@@ -11,8 +11,6 @@ import ConsolePane from "./components/ConsolePane";
 import ChatWidget from "./components/ChatWidget";
 import "./App.css";
 
-// Import the mascot commands so they get registered globally.
-import "./components/mascotCommands.js";
 function App() {
   const [generatedCode, setGeneratedCode] = useState("");
   const [terminalOutput, setTerminalOutput] = useState("");
