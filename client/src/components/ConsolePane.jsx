@@ -309,7 +309,7 @@ const ConsolePane = ({ onCommand }) => {
           setPosition(initialPosition.current);
           setAnimation(prev => ({
             ...prev,
-            rotation: 15,
+            rotation: 2,
             onComplete: null // Wait until walk completes before rotating back.
           }));
           setTimeout(() => {
@@ -317,7 +317,7 @@ const ConsolePane = ({ onCommand }) => {
               ...prev,
               type: ANIMATION_TYPES.WALK,
               frameIndex: 0,
-              steps: 14,
+              steps: 30,
               onComplete: () => {
                 setAnimation(prev => ({
                   ...prev,
