@@ -18,18 +18,18 @@ const SPRITE_CONFIG = {
   idle: {
     img: idleSprite,
     frameCount: 2,
-    width: 300,
-    height: 200,
+    width: 150,
+    height: 100,
     loop: true,
     frameDuration: 150
   },
   walk: {
     img: walkSprite,
     frameCount: 4,
-    width: 2400,
-    height: 620,
+    width: 300,
+    height:100,
     loop: true,
-    frameDuration: 100
+    frameDuration: 150
   },
   speak: {
     img: idleSprite,
@@ -75,7 +75,25 @@ const ConsolePane = ({ onCommand }) => {
       setAnimation(prev => {
         if (prev.type === ANIMATION_TYPES.WALK && prev.steps !== 0) {
           const direction = Number(prev.steps) > 0 ? 1 : -1;
-          setPosition(pos => ({ x: pos.x + 5 * direction, y: pos.y }));
+          
+          // Calculate movement based on rotation angle and turned state
+          let effectiveRotation = prev.rotation;
+          
+          // If the mascot is turned (flipped horizontally), we need to adjust the rotation
+          // to make it walk in the opposite direction
+          if (prev.turned) {
+            effectiveRotation = (effectiveRotation + 180) % 360;
+          }
+          
+          const angleInRadians = (effectiveRotation * Math.PI) / 180;
+          const moveX = 5 * direction * Math.cos(angleInRadians);
+          const moveY = 5 * direction * Math.sin(angleInRadians);
+          
+          setPosition(pos => ({ 
+            x: pos.x + moveX, 
+            y: pos.y + moveY 
+          }));
+          
           if (prev.frameIndex === currentSprite.frameCount - 1) {
             stepsCompleted++;
             if (stepsCompleted >= Math.abs(Number(prev.steps))) {
@@ -99,18 +117,30 @@ const ConsolePane = ({ onCommand }) => {
   useEffect(() => {
     if (!animation.isFlipping) return;
     let rot = 0;
-    const flipSpeed = 20;
+    const flipSpeed = 10;
+    
+    // Move up 10px at the start of the flip
+    setPosition(pos => ({ x: pos.x, y: pos.y - 10 }));
+    
     const flipStep = () => {
       rot += flipSpeed;
       if (rot >= 360) {
         setAnimation(prev => ({ ...prev, isFlipping: false, rotation: 0 }));
+        // Move back down 10px after the flip is complete
+        setPosition(pos => ({ x: pos.x, y: pos.y + 10 }));
         clearInterval(flipAnimationRef.current);
       } else {
         setAnimation(prev => ({ ...prev, rotation: rot }));
       }
     };
-    flipAnimationRef.current = setInterval(flipStep, 16);
-    return () => clearInterval(flipAnimationRef.current);
+    flipAnimationRef.current = setInterval(flipStep, 20);
+    return () => {
+      clearInterval(flipAnimationRef.current);
+      // Ensure we move back down if the component unmounts during a flip
+      if (animation.isFlipping) {
+        setPosition(pos => ({ x: pos.x, y: pos.y + 10 }));
+      }
+    };
   }, [animation.isFlipping]);
 
   // Rotate animation effect.
@@ -203,7 +233,7 @@ const ConsolePane = ({ onCommand }) => {
           setIsSpeaking(false);
           break;
         case "turnAround":
-          // Toggle horizontal flip.
+          // Toggle horizontal flip
           setAnimation(prev => ({
             ...prev,
             turned: !prev.turned
