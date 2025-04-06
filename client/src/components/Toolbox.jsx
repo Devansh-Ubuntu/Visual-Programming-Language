@@ -6,8 +6,8 @@ const toolbox = {
   contents: [
     {
       kind: "category",
-      name: "Mascot",
-      colour: "#a66e5b",  // Blue color for mascot category
+      name: "Action",
+      colour: "#a66e5b",
       contents: [
         { kind: "block", type: "mascot_walk" },
         { kind: "block", type: "mascot_turn_around" },

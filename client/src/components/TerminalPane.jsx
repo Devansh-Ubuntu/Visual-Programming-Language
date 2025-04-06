@@ -77,8 +77,6 @@ const TerminalPane = forwardRef(
       };
     }, [onUserInput, pendingInputCallback, clearPendingInputCallback]);
 
-    // Modified output update effect:
-    // Write only new output without reprinting the prompt or clearing the current input.
     useEffect(() => {
       if (!termInstance.current || isInitialMount.current) return;
       if (terminalOutput && terminalOutput !== prevTerminalOutput.current) {
