@@ -130,7 +130,29 @@ Blockly.defineBlocksWithJsonArray([
     nextStatement: null,
     colour: 15,
     tooltip: "Make the mascot cross the road",
+  },
+  {
+    "type": "mascot_set_position",
+    "message0": "set position to x: %1 y: %2",
+    "args0": [
+      {
+        "type": "input_value",
+        "name": "X",
+        "check": "Number"
+      },
+      {
+        "type": "input_value",
+        "name": "Y",
+        "check": "Number"
+      }
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": 15,
+    "tooltip": "Set the mascot's position to the given x and y coordinates",
+    "helpUrl": ""
   }
+  
 ]);
 
 javascriptGenerator.forBlock["mascot_walk"] = function (block) {
@@ -166,6 +188,10 @@ javascriptGenerator.forBlock["mascot_cross_road"] = function () {
   return `mascotCommand({ action: 'crossRoad' });\n`;
 };
 
-
+javascriptGenerator.forBlock["mascot_set_position"] = function(block) {
+  const x = javascriptGenerator.valueToCode(block, "X", javascriptGenerator.ORDER_ATOMIC) || "0";
+  const y = javascriptGenerator.valueToCode(block, "Y", javascriptGenerator.ORDER_ATOMIC) || "0";
+  return `mascotCommand({ action: 'setPosition', x: ${x}, y: ${y} });\n`;
+};
 
 // No need to export anything special—just import this file once for side effects.

@@ -59,6 +59,9 @@ function App() {
     if (interpreterRef.current) {
       interpreterRef.current.stopCode();
     }
+    if (mascotHandler) {
+      mascotHandler({ action: "stop" });
+    }
   };
 
   // User input from TerminalPane.

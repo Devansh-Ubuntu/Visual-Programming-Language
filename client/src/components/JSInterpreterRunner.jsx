@@ -9,6 +9,7 @@ const JSInterpreterRunner = forwardRef(({ code, setTerminalOutput, onPendingInpu
       let stopRequested = false;
 
       return {
+        
         runCode() {
           if (!code || !code.trim()) {
             setTerminalOutput("No code provided!\n");
@@ -99,6 +100,11 @@ const JSInterpreterRunner = forwardRef(({ code, setTerminalOutput, onPendingInpu
                       window.mascotCrossRoad();
                     }
                     break;
+                    case "setPosition":
+                      if (window.mascotSetPosition) {
+                        window.mascotSetPosition(nativeCommand.x, nativeCommand.y);
+                      }
+                      break;
                     default:
                       console.error("Unknown mascot command", nativeCommand);
                   }

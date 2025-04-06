@@ -15,7 +15,8 @@ const toolbox = {
         { kind: "block", type: "mascot_flip" },
         { kind: "block", type: "mascot_rotate" },
         { kind: "block", type: "mascot_speak" },
-        { kind: "block", type: "mascot_reset" }
+        { kind: "block", type: "mascot_reset" },
+        { kind: "block", type: "mascot_set_position" }
       ]
     },
     {
