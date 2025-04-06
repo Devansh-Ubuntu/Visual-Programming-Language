@@ -54,7 +54,13 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange, onM
           window.handleMascotCommand({ action: "crossRoad" });
         }
       };
-  
+      
+      window.mascotSetPosition = function(x, y) {
+        if (window.handleMascotCommand) {
+          window.handleMascotCommand({ action: "setPosition", x, y });
+        }
+      };
+      
       console.log("Global mascot handler and functions set:", onMascotCommand);
     }
     return () => {
