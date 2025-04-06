@@ -369,8 +369,7 @@ const ConsolePane = ({ onCommand }) => {
         height: "100%",
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat"
+        backgroundPosition: "center"
       }}>
         <div
           ref={mascotRef}
