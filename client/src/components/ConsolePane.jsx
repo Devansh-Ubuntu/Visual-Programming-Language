@@ -28,7 +28,7 @@ const SPRITE_CONFIG = {
     img: walkSprite,
     frameCount: 4,
     width: 300,
-    height:100,
+    height: 100,
     loop: true,
     frameDuration: 150
   },
@@ -52,7 +52,8 @@ const ConsolePane = ({ onCommand }) => {
     message: "",
     rotation: 0,
     isFlipping: false,
-    turned: false // Added property to track horizontal flip.
+    turned: false,
+    onComplete: null // Added to support asynchronous completion.
   });
   const [isSpeaking, setIsSpeaking] = useState(false);
 
@@ -92,16 +93,12 @@ const ConsolePane = ({ onCommand }) => {
           
           // Calculate movement based on rotation angle and turned state
           let effectiveRotation = prev.rotation;
-          
-          // If the mascot is turned (flipped horizontally), we need to adjust the rotation
-          // to make it walk in the opposite direction
           if (prev.turned) {
             effectiveRotation = (effectiveRotation + 180) % 360;
           }
-          
           const angleInRadians = (effectiveRotation * Math.PI) / 180;
-          const moveX = 5 * direction * Math.cos(angleInRadians);
-          const moveY = 5 * direction * Math.sin(angleInRadians);
+          const moveX = 2 * direction * Math.cos(angleInRadians);
+          const moveY = 2 * direction * Math.sin(angleInRadians);
           
           setPosition(pos => ({ 
             x: pos.x + moveX, 
@@ -111,22 +108,24 @@ const ConsolePane = ({ onCommand }) => {
           if (prev.frameIndex === currentSprite.frameCount - 1) {
             stepsCompleted++;
             if (stepsCompleted >= Math.abs(Number(prev.steps))) {
-              newState = { 
-                ...newState, 
-                type: ANIMATION_TYPES.IDLE, 
-                frameIndex: 0, 
-                steps: 0 
-              };
+              // Invoke completion callback if provided
+              if (prev.onComplete) {
+                prev.onComplete();
+              }
+              return { ...prev, type: ANIMATION_TYPES.IDLE, frameIndex: 0, steps: 0, onComplete: null };
             }
           }
         }
-        
-        // Update frame index for all animation types
-        if (newState.type !== ANIMATION_TYPES.IDLE || newState.frameIndex > 0) {
-          newState.frameIndex = (newState.frameIndex + 1) % currentSprite.frameCount;
+        if (prev.type === ANIMATION_TYPES.SPEAK && !currentSprite.loop && prev.frameIndex === currentSprite.frameCount - 1) {
+          setIsSpeaking(false);
+          // Invoke completion callback if provided
+          if (prev.onComplete) {
+            prev.onComplete();
+          }
+          return { ...prev, type: ANIMATION_TYPES.IDLE, frameIndex: 0, message: "", onComplete: null };
         }
-        
-        return newState;
+        const nextIndex = (prev.frameIndex + 1) % currentSprite.frameCount;
+        return { ...prev, frameIndex: nextIndex };
       });
     };
     
@@ -150,7 +149,7 @@ const ConsolePane = ({ onCommand }) => {
   useEffect(() => {
     if (!animation.isFlipping) return;
     let rot = 0;
-    const flipSpeed = 10;
+    const flipSpeed = 5;
     
     // Move up 10px at the start of the flip
     setPosition(pos => ({ x: pos.x, y: pos.y - 10 }));
@@ -162,6 +161,9 @@ const ConsolePane = ({ onCommand }) => {
         // Move back down 10px after the flip is complete
         setPosition(pos => ({ x: pos.x, y: pos.y + 10 }));
         clearInterval(flipAnimationRef.current);
+        if (animation.onComplete) {
+          animation.onComplete();
+        }
       } else {
         setAnimation(prev => ({ ...prev, rotation: rot }));
       }
@@ -174,7 +176,7 @@ const ConsolePane = ({ onCommand }) => {
         setPosition(pos => ({ x: pos.x, y: pos.y + 10 }));
       }
     };
-  }, [animation.isFlipping]);
+  }, [animation.isFlipping, animation.onComplete]);
 
   // Rotate animation effect.
   useEffect(() => {
@@ -191,6 +193,9 @@ const ConsolePane = ({ onCommand }) => {
           rotation: prev.rotation + target
         }));
         clearInterval(rotateAnimationRef.current);
+        if (animation.onComplete) {
+          animation.onComplete();
+        }
       } else {
         setAnimation(prev => ({
           ...prev,
@@ -200,145 +205,151 @@ const ConsolePane = ({ onCommand }) => {
     };
     rotateAnimationRef.current = setInterval(rotateStep, 16);
     return () => clearInterval(rotateAnimationRef.current);
-  }, [animation.degrees]);
+  }, [animation.degrees, animation.onComplete]);
 
-  // IMPORTANT: Expose the mascot command handler upward.
+  // Expose the mascot command handler upward.
   useEffect(() => {
     if (!onCommand) return;
-    const handleCommand = (command) => {
+    const handleCommand = (command, doneCallback) => {
       console.log("ConsolePane received command:", command);
       
-      // Create a queue for commands to prevent animation disruption
-      const executeCommand = () => {
-        switch (command.action) {
-          case "walk": {
-            const steps = Number(command.value) || 0;
+      switch (command.action) {
+        case "walk": {
+          const steps = Number(command.value) || 0;
+          setAnimation(prev => ({
+            ...prev,
+            type: ANIMATION_TYPES.WALK,
+            frameIndex: 0,
+            steps: steps,
+            onComplete: doneCallback
+          }));
+          break;
+        }
+        case "flip":
+          setAnimation(prev => ({
+            ...prev,
+            type: ANIMATION_TYPES.IDLE,
+            isFlipping: true,
+            onComplete: doneCallback
+          }));
+          break;
+        case "rotate":
+          setAnimation(prev => ({
+            ...prev,
+            type: ANIMATION_TYPES.IDLE,
+            degrees: Number(command.value) || 0,
+            onComplete: doneCallback
+          }));
+          break;
+        case "speak":
+          clearTimeout(speakTimeoutRef.current);
+          setAnimation(prev => ({
+            ...prev,
+            type: ANIMATION_TYPES.SPEAK,
+            frameIndex: 0,
+            message: command.message,
+            onComplete: doneCallback
+          }));
+          setIsSpeaking(true);
+          speakTimeoutRef.current = setTimeout(() => {
+            setIsSpeaking(false);
+            setAnimation(prev => ({
+              ...prev,
+              type: ANIMATION_TYPES.IDLE,
+              frameIndex: 0,
+              message: "",
+              onComplete: null
+            }));
+            if (doneCallback) doneCallback();
+          }, (command.duration || 1) * 1000);
+          break;
+        case "reset":
+          setPosition(initialPosition.current);
+          setAnimation({
+            type: ANIMATION_TYPES.IDLE,
+            frameIndex: 0,
+            steps: 0,
+            degrees: 0,
+            message: "",
+            rotation: 0,
+            isFlipping: false,
+            turned: false,
+            onComplete: null
+          });
+          setIsSpeaking(false);
+          if (doneCallback) doneCallback();
+          break;
+        case "turnAround":
+          // Toggle horizontal flip
+          setAnimation(prev => ({
+            ...prev,
+            turned: !prev.turned,
+            onComplete: doneCallback
+          }));
+          // Assume immediate completion:
+          if (doneCallback) doneCallback();
+          break;
+        case "crossRoad":
+          // Sequence: reset position, rotate -15°, walk 10 steps, then rotate back to normal.
+          setPosition(initialPosition.current);
+          setAnimation(prev => ({
+            ...prev,
+            rotation: -15,
+            onComplete: null // Wait until walk completes before rotating back.
+          }));
+          setTimeout(() => {
             setAnimation(prev => ({
               ...prev,
               type: ANIMATION_TYPES.WALK,
               frameIndex: 0,
-              steps: steps
-            }));
-            break;
-          }
-          case "flip":
-            setAnimation(prev => ({
-              ...prev,
-              type: ANIMATION_TYPES.IDLE,
-              isFlipping: true
-            }));
-            break;
-          case "rotate":
-            setAnimation(prev => ({
-              ...prev,
-              type: ANIMATION_TYPES.IDLE,
-              degrees: Number(command.value) || 0
-            }));
-            break;
-          case "speak":
-            clearTimeout(speakTimeoutRef.current);
-            
-            // Keep the sprite in idle animation state while displaying the speech bubble
-            setAnimation(prev => ({
-              ...prev,
-              type: ANIMATION_TYPES.IDLE, // Keep in idle state
-              frameIndex: 0,
-              message: command.message
-            }));
-            
-            setIsSpeaking(true);
-            
-            // Ensure the speech bubble stays visible for the specified duration
-            const duration = Number(command.duration) || 1;
-            speakTimeoutRef.current = setTimeout(() => {
-              setIsSpeaking(false);
-              setAnimation(prev => ({
-                ...prev,
-                message: ""
-              }));
-            }, duration * 1000);
-            break;
-          case "reset":
-            setPosition(initialPosition.current);
-            setAnimation({
-              type: ANIMATION_TYPES.IDLE,
-              frameIndex: 0,
-              steps: 0,
-              degrees: 0,
-              message: "",
-              rotation: 0,
-              isFlipping: false,
-              turned: false
-            });
-            setIsSpeaking(false);
-            break;
-          case "turnAround":
-            // Toggle horizontal flip
-            setAnimation(prev => ({
-              ...prev,
-              turned: !prev.turned
-            }));
-            break;
-          case "crossRoad":
-            // Sequence: reset position, rotate -15°, walk 10 steps, then rotate back to normal.
-            setPosition(initialPosition.current);
-            setAnimation(prev => ({
-              ...prev,
-              rotation: -15
-            }));
-            // After a short delay, initiate walk.
-            setTimeout(() => {
-              setAnimation(prev => ({
-                ...prev,
-                type: ANIMATION_TYPES.WALK,
-                frameIndex: 0,
-                steps: 10
-              }));
-              // After the walk, rotate back to normal.
-              setTimeout(() => {
+              steps: 10,
+              onComplete: () => {
                 setAnimation(prev => ({
                   ...prev,
                   rotation: 0,
-                  type: ANIMATION_TYPES.IDLE
+                  type: ANIMATION_TYPES.IDLE,
+                  onComplete: doneCallback
                 }));
-              }, 10 * currentSprite.frameDuration + 200);
-            }, 500);
-            break;
-          case "stop":
-            clearInterval(flipAnimationRef.current);
-            clearInterval(rotateAnimationRef.current);
-            clearTimeout(speakTimeoutRef.current);
-            setPosition(initialPosition.current);
-            setAnimation({
-              type: ANIMATION_TYPES.IDLE,
-              frameIndex: 0,
-              steps: 0,
-              degrees: 0,
-              message: "",
-              rotation: 0,
-              isFlipping: false,
-              turned: false
-            });
-            setIsSpeaking(false);
-            break;
-          case "setPosition":
-            // NEW: Set the mascot's position directly.
-            setPosition({ x: Number(command.x), y: Number(command.y) });
-            break;
-          default:
-            setAnimation(prev => ({
-              ...prev,
-              type: ANIMATION_TYPES.IDLE,
-              frameIndex: 0,
-              steps: 0,
-              degrees: 0,
-              message: ""
+              }
             }));
-        }
-      };
-      
-      // Execute the command immediately
-      executeCommand();
+          }, 500);
+          break;
+        case "stop":
+          clearInterval(flipAnimationRef.current);
+          clearInterval(rotateAnimationRef.current);
+          clearTimeout(speakTimeoutRef.current);
+          setPosition(initialPosition.current);
+          setAnimation({
+            type: ANIMATION_TYPES.IDLE,
+            frameIndex: 0,
+            steps: 0,
+            degrees: 0,
+            message: "",
+            rotation: 0,
+            isFlipping: false,
+            turned: false,
+            onComplete: null
+          });
+          setIsSpeaking(false);
+          if (doneCallback) doneCallback();
+          break;
+        case "setPosition":
+          // Set the mascot's position directly.
+          setPosition({ x: Number(command.x), y: Number(command.y) });
+          if (doneCallback) doneCallback();
+          break;
+        default:
+          setAnimation(prev => ({
+            ...prev,
+            type: ANIMATION_TYPES.IDLE,
+            frameIndex: 0,
+            steps: 0,
+            degrees: 0,
+            message: "",
+            onComplete: null
+          }));
+          if (doneCallback) doneCallback();
+      }
     };
 
     // Pass our command handler upward.
