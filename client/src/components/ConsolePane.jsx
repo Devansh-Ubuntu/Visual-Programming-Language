@@ -151,15 +151,15 @@ const ConsolePane = ({ onCommand }) => {
     let rot = 0;
     const flipSpeed = 5;
     
-    // Move up 10px at the start of the flip
-    setPosition(pos => ({ x: pos.x, y: pos.y - 10 }));
+    // Move up 5px at the start of the flip (reduced from 10px)
+    setPosition(pos => ({ x: pos.x, y: pos.y - 5 }));
     
     const flipStep = () => {
       rot += flipSpeed;
       if (rot >= 360) {
         setAnimation(prev => ({ ...prev, isFlipping: false, rotation: 0 }));
-        // Move back down 10px after the flip is complete
-        setPosition(pos => ({ x: pos.x, y: pos.y + 10 }));
+        // Move back down 5px after the flip is complete (reduced from 10px)
+        setPosition(pos => ({ x: pos.x, y: pos.y + 5 }));
         clearInterval(flipAnimationRef.current);
         if (animation.onComplete) {
           animation.onComplete();
@@ -173,7 +173,7 @@ const ConsolePane = ({ onCommand }) => {
       clearInterval(flipAnimationRef.current);
       // Ensure we move back down if the component unmounts during a flip
       if (animation.isFlipping) {
-        setPosition(pos => ({ x: pos.x, y: pos.y + 10 }));
+        setPosition(pos => ({ x: pos.x, y: pos.y + 5 }));
       }
     };
   }, [animation.isFlipping, animation.onComplete]);
@@ -191,6 +191,9 @@ const ConsolePane = ({ onCommand }) => {
     const totalSteps = Math.max(10, Math.abs(target) / 5);
     const speed = target / totalSteps;
     
+    // Move up slightly at the start of rotation
+    setPosition(pos => ({ x: pos.x, y: pos.y - 5 }));
+    
     let rotated = 0;
     const rotateStep = () => {
       rotated += speed;
@@ -203,6 +206,8 @@ const ConsolePane = ({ onCommand }) => {
           degrees: 0,
           rotation: initialRotation + target // Use initial rotation + target for exact positioning
         }));
+        // Move back down after rotation completes
+        setPosition(pos => ({ x: pos.x, y: pos.y + 5 }));
         clearInterval(rotateAnimationRef.current);
         if (animation.onComplete) {
           animation.onComplete();
@@ -221,7 +226,13 @@ const ConsolePane = ({ onCommand }) => {
     const intervalTime = Math.max(10, 200 / totalSteps);
     rotateAnimationRef.current = setInterval(rotateStep, intervalTime);
     
-    return () => clearInterval(rotateAnimationRef.current);
+    return () => {
+      clearInterval(rotateAnimationRef.current);
+      // Ensure we move back down if the component unmounts during rotation
+      if (animation.degrees !== 0) {
+        setPosition(pos => ({ x: pos.x, y: pos.y + 5 }));
+      }
+    };
   }, [animation.degrees, animation.onComplete]);
 
   // Expose the mascot command handler upward.
@@ -411,7 +422,7 @@ const ConsolePane = ({ onCommand }) => {
             backgroundSize: `${currentSprite.width}px ${currentSprite.height}px`,
             cursor: "grab",
             transform: `scaleX(${animation.turned ? -1 : 1}) rotate(${animation.rotation}deg)`,
-            transformOrigin: "center center",
+            transformOrigin: "center 75%",
             transition: animation.isFlipping || animation.degrees ? "none" : "transform 0.1s ease",
             // Force consistent dimensions for speak animation
             ...(animation.type === ANIMATION_TYPES.SPEAK ? {
