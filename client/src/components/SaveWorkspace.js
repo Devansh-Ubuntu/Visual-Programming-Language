@@ -11,14 +11,12 @@ export const saveWorkspace = (workspaceData, filename = "workspace.xml") => {
     a.href = url;
     a.download = filename;
 
-    // Append to document to make sure it's clickable in all browsers
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
 
     console.log(` Workspace saved successfully as '${filename}'`);
 
-    // Free memory after a short delay
     setTimeout(() => URL.revokeObjectURL(url), 100);
     console.log(` Workspace saved successfully as '${filename}'`);
   } catch (err) {

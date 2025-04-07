@@ -8,10 +8,10 @@ const ChatBaseChatBot = () => {
       title="ChatBase Chatbot"
       style={{
         width: "100%",
-        height: "700px", // Adjust height as needed
+        height: "700px",
         border: "none",
       }}
-      allow="microphone; camera" // If your bot needs access to these features
+      allow="microphone; camera"
     />
   );
 };

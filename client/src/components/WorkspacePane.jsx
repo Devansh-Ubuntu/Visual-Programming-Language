@@ -75,14 +75,15 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange, onM
       workspaceRef.current = Blockly.inject(blocklyDiv.current, {
         toolbox: toolbox,
         trashcan: true,
-        zoom:
-        {controls: true,
-         wheel: true,
-         startScale: 1.0,
-         maxScale: 3,
-         minScale: 0.3,
-         scaleSpeed: 1.2,
-         pinch: true},
+        zoom: {
+          controls: true,
+          wheel: true,
+          startScale: 1.0,
+          maxScale: 3,
+          minScale: 0.3,
+          scaleSpeed: 1.2,
+          pinch: true
+        },
         scrollbars: true,
         grid: {
           spacing: 20,
@@ -91,11 +92,22 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange, onM
           snap: true
         }
       });
+
+      window.blocklyWorkspace = workspaceRef.current;
+
+      window.updateBlockField = (blockId, fieldName, value) => {
+        const block = window.blocklyWorkspace.getBlockById(blockId);
+        if (block) {
+          block.setFieldValue(value, fieldName);
+          updateCode();
+        }
+      };
+
       if (onMascotCommand) {
         window.handleMascotCommand = onMascotCommand;
         console.log("Backup mascot handler set inside Blockly useEffect");
       }
-
+  
       const combinedListener = function(event) {
         if (event.type === Blockly.Events.CHANGE && event.element === 'field') {
           Blockly.hideChaff(true);
@@ -105,9 +117,9 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange, onM
         }
         updateCode();
       };
-
+  
       workspaceRef.current.addChangeListener(combinedListener);
-
+  
       if (workspaceRef.current.getAllBlocks().length === 0) {
         const defaultXML = `
           <xml>
@@ -123,11 +135,11 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange, onM
         const xmlDom = Blockly.Xml.textToDom ? Blockly.Xml.textToDom(defaultXML) : textToDomPolyfill(defaultXML);
         Blockly.Xml.domToWorkspace(xmlDom, workspaceRef.current);
       }
-
+  
       const timer = setTimeout(() => {
         updateCode();
       }, 200);
-
+  
       return () => {
         clearTimeout(timer);
         workspaceRef.current.removeChangeListener(combinedListener);
@@ -135,7 +147,7 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange, onM
       };
     }
   }, [updateCode, setGeneratedCode]);
-
+  
   return (
     <div id="blocklyDiv" className="blockly-workspace" ref={blocklyDiv} />
   );

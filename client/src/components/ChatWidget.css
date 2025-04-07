@@ -1,12 +1,11 @@
 /* src/components/ChatWidget.css */
 .chat-widget-container {
     position: fixed;
-    bottom: 20px; /* Adjust vertical position */
-    right: 20px;  /* Adjust horizontal position */
+    bottom: 20px;
+    right: 20px;
     z-index: 1000;
   }
   
-  /* Minimized state: small red circle */
   .chat-minimized {
     width: 50px;
     height: 50px;
@@ -20,11 +19,10 @@
     color: #fff;
     font-weight: bold;
   }
-  
-  /* Expanded chat window styling */
+
   .chat-window {
-    width: 500px;  /* Adjust width as needed */
-    height: 700px; /* Adjust height as needed */
+    width: 500px; 
+    height: 700px; 
     background-color: #fff;
     border: 1px solid #ccc;
     border-radius: 8px;
@@ -53,14 +51,13 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: auto; /* allow scrolling if the content is taller than 80vh */
+    overflow: auto;
   }
   
-  /* Optional: if you want to ensure the iframe fits within .chat-content */
   .chat-content iframe {
     width: 100%;
-    height: calc(100% + 50px); /* artificially extend the iframe height */
-    margin-bottom: -50px;      /* pull the bottom up by 50px */
+    height: calc(100% + 50px);
+    margin-bottom: -50px;
     display: block;
     border: none;
   }

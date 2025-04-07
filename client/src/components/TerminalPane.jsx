@@ -33,7 +33,6 @@ const TerminalPane = forwardRef(
       termInstance.current.open(terminalRef.current);
       fitAddon.current.fit();
 
-      // Write the initial prompt.
       termInstance.current.write("> ");
       prevTerminalOutput.current = "";
       isInitialMount.current = false;
@@ -42,7 +41,6 @@ const TerminalPane = forwardRef(
         if (data === "\r") {
           termInstance.current.write("\r\n");
 
-          // If a pending input callback exists, use it.
           if (pendingInputCallback) {
             pendingInputCallback(inputBuffer);
             clearPendingInputCallback();

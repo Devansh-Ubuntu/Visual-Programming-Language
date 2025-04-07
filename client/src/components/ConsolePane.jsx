@@ -2,7 +2,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 
-// Import sprite sheets and assets
 import idleSprite from "../assets/idle.png";
 import walkSprite from "../assets/walk.png";
 import backgroundImage from "../assets/download.jpg";
@@ -53,7 +52,7 @@ const ConsolePane = ({ onCommand }) => {
     rotation: 0,
     isFlipping: false,
     turned: false,
-    onComplete: null // Added to support asynchronous completion.
+    onComplete: null
   });
   const [isSpeaking, setIsSpeaking] = useState(false);
 
@@ -69,8 +68,7 @@ const ConsolePane = ({ onCommand }) => {
   const currentSprite = SPRITE_CONFIG[animation.type] || SPRITE_CONFIG.idle;
   const frameWidth = currentSprite.width / currentSprite.frameCount;
   const frameHeight = currentSprite.height;
-  
-  // Use preserved dimensions for speak animation if available
+
   const spriteWidth = animation.type === ANIMATION_TYPES.SPEAK && animation.spriteWidth 
     ? animation.spriteWidth 
     : currentSprite.width;
@@ -78,20 +76,16 @@ const ConsolePane = ({ onCommand }) => {
   const spriteHeight = animation.type === ANIMATION_TYPES.SPEAK && animation.spriteHeight 
     ? animation.spriteHeight 
     : currentSprite.height;
-  
-  // Animation loop for frame updates.
+
   useEffect(() => {
     let stepsCompleted = 0;
     const animate = () => {
       setAnimation(prev => {
-        // Create a new animation state object to avoid mutation
         let newState = { ...prev };
-        
-        // Handle different animation types
+
         if (prev.type === ANIMATION_TYPES.WALK && prev.steps !== 0) {
           const direction = Number(prev.steps) > 0 ? 1 : -1;
-          
-          // Calculate movement based on rotation angle and turned state
+
           let effectiveRotation = prev.rotation;
           if (prev.turned) {
             effectiveRotation = (effectiveRotation + 180) % 360;
@@ -108,7 +102,7 @@ const ConsolePane = ({ onCommand }) => {
           if (prev.frameIndex === currentSprite.frameCount - 1) {
             stepsCompleted++;
             if (stepsCompleted >= Math.abs(Number(prev.steps))) {
-              // Invoke completion callback if provided
+
               if (prev.onComplete) {
                 prev.onComplete();
               }
@@ -118,7 +112,7 @@ const ConsolePane = ({ onCommand }) => {
         }
         if (prev.type === ANIMATION_TYPES.SPEAK && !currentSprite.loop && prev.frameIndex === currentSprite.frameCount - 1) {
           setIsSpeaking(false);
-          // Invoke completion callback if provided
+
           if (prev.onComplete) {
             prev.onComplete();
           }
@@ -128,16 +122,13 @@ const ConsolePane = ({ onCommand }) => {
         return { ...prev, frameIndex: nextIndex };
       });
     };
-    
-    // Clear any existing animation interval
+
     if (animationRef.current) {
       clearInterval(animationRef.current);
     }
-    
-    // Set up a new animation interval
+
     animationRef.current = setInterval(animate, currentSprite.frameDuration);
-    
-    // Clean up on unmount or when dependencies change
+
     return () => {
       if (animationRef.current) {
         clearInterval(animationRef.current);
@@ -145,20 +136,17 @@ const ConsolePane = ({ onCommand }) => {
     };
   }, [animation.type, currentSprite.frameCount, currentSprite.frameDuration, currentSprite.loop]);
 
-  // Flip animation effect.
   useEffect(() => {
     if (!animation.isFlipping) return;
     let rot = 0;
     const flipSpeed = 5;
-    
-    // Move up 5px at the start of the flip (reduced from 10px)
+
     setPosition(pos => ({ x: pos.x, y: pos.y - 5 }));
     
     const flipStep = () => {
       rot += flipSpeed;
       if (rot >= 360) {
         setAnimation(prev => ({ ...prev, isFlipping: false, rotation: 0 }));
-        // Move back down 5px after the flip is complete (reduced from 10px)
         setPosition(pos => ({ x: pos.x, y: pos.y + 5 }));
         clearInterval(flipAnimationRef.current);
         if (animation.onComplete) {
@@ -171,71 +159,57 @@ const ConsolePane = ({ onCommand }) => {
     flipAnimationRef.current = setInterval(flipStep, 20);
     return () => {
       clearInterval(flipAnimationRef.current);
-      // Ensure we move back down if the component unmounts during a flip
       if (animation.isFlipping) {
         setPosition(pos => ({ x: pos.x, y: pos.y + 5 }));
       }
     };
   }, [animation.isFlipping, animation.onComplete]);
 
-  // Rotate animation effect.
   useEffect(() => {
     if (animation.degrees === 0) return;
     const target = Number(animation.degrees);
-    
-    // Store the initial rotation value
+
     const initialRotation = animation.rotation;
-    
-    // Calculate the number of steps based on the target angle
-    // Use more steps for larger angles to ensure smooth animation
+
     const totalSteps = Math.max(10, Math.abs(target) / 5);
     const speed = target / totalSteps;
-    
-    // Move up slightly at the start of rotation
+
     setPosition(pos => ({ x: pos.x, y: pos.y - 5 }));
     
     let rotated = 0;
     const rotateStep = () => {
       rotated += speed;
-      
-      // Check if we've reached or exceeded the target rotation
+
       if (Math.abs(rotated) >= Math.abs(target)) {
-        // Set the final rotation value exactly to the target
         setAnimation(prev => ({
           ...prev,
           degrees: 0,
-          rotation: initialRotation + target // Use initial rotation + target for exact positioning
+          rotation: initialRotation + target
         }));
-        // Move back down after rotation completes
         setPosition(pos => ({ x: pos.x, y: pos.y + 5 }));
         clearInterval(rotateAnimationRef.current);
         if (animation.onComplete) {
           animation.onComplete();
         }
       } else {
-        // Apply the incremental rotation
         setAnimation(prev => ({
           ...prev,
-          rotation: initialRotation + rotated // Use initial rotation + current rotated amount
+          rotation: initialRotation + rotated
         }));
       }
     };
-    
-    // Adjust interval timing based on the total steps
-    // Faster for smaller angles, slower for larger angles
+
     const intervalTime = Math.max(10, 200 / totalSteps);
     rotateAnimationRef.current = setInterval(rotateStep, intervalTime);
     
     return () => {
       clearInterval(rotateAnimationRef.current);
-      // Ensure we move back down if the component unmounts during rotation
       if (animation.degrees !== 0) {
         setPosition(pos => ({ x: pos.x, y: pos.y + 5 }));
       }
     };
   }, [animation.degrees, animation.onComplete]);
 
-  // Expose the mascot command handler upward.
   useEffect(() => {
     if (!onCommand) return;
     const handleCommand = (command, doneCallback) => {
@@ -306,22 +280,19 @@ const ConsolePane = ({ onCommand }) => {
           if (doneCallback) doneCallback();
           break;
         case "turnAround":
-          // Toggle horizontal flip
           setAnimation(prev => ({
             ...prev,
             turned: !prev.turned,
             onComplete: doneCallback
           }));
-          // Assume immediate completion:
           if (doneCallback) doneCallback();
           break;
         case "crossRoad":
-          // Sequence: reset position, rotate -15°, walk 10 steps, then rotate back to normal.
           setPosition(initialPosition.current);
           setAnimation(prev => ({
             ...prev,
             rotation: 2,
-            onComplete: null // Wait until walk completes before rotating back.
+            onComplete: null
           }));
           setTimeout(() => {
             setAnimation(prev => ({
@@ -360,7 +331,6 @@ const ConsolePane = ({ onCommand }) => {
           if (doneCallback) doneCallback();
           break;
         case "setPosition":
-          // Set the mascot's position directly.
           setPosition({ x: Number(command.x), y: Number(command.y) });
           if (doneCallback) doneCallback();
           break;
@@ -378,12 +348,10 @@ const ConsolePane = ({ onCommand }) => {
       }
     };
 
-    // Pass our command handler upward.
     onCommand(handleCommand);
     return () => clearTimeout(speakTimeoutRef.current);
   }, [onCommand, currentSprite.frameDuration]);
 
-  // Drag handlers for repositioning the mascot.
   const handleMouseDown = (e) => {
     isDragging.current = true;
     offset.current = { x: e.clientX - position.x, y: e.clientY - position.y };
@@ -424,7 +392,6 @@ const ConsolePane = ({ onCommand }) => {
             transform: `scaleX(${animation.turned ? -1 : 1}) rotate(${animation.rotation}deg)`,
             transformOrigin: "center 75%",
             transition: animation.isFlipping || animation.degrees ? "none" : "transform 0.1s ease",
-            // Force consistent dimensions for speak animation
             ...(animation.type === ANIMATION_TYPES.SPEAK ? {
               width: SPRITE_CONFIG.idle.width / SPRITE_CONFIG.idle.frameCount,
               height: SPRITE_CONFIG.idle.height,

@@ -16,14 +16,12 @@ function App() {
   const [terminalOutput, setTerminalOutput] = useState("");
   const [dockInfo, setDockInfo] = useState({ docked: false, edge: null, dockSize: {} });
   const [pendingInputCallback, setPendingInputCallback] = useState(null);
-  // State to hold the mascot command handler from ConsolePane.
   const [mascotHandler, setMascotHandler] = useState(null);
 
   const interpreterRef = useRef(null);
   const terminalPaneRef = useRef(null);
   const workspaceRef = useRef(null);
 
-  // Inject Blockly workspace on mount.
   useEffect(() => {
     const workspace = Blockly.inject("blocklyDiv", {
       toolbox: document.getElementById("toolbox"),
@@ -37,11 +35,9 @@ function App() {
     setTerminalOutput("");
   };
 
-  // Run button handler.
   const handleRun = () => {
     console.log("Run button clicked");
     clearTerminal();
-    // Wait a short time to make sure all handlers are set
     setTimeout(() => {
       if (interpreterRef.current) {
         interpreterRef.current.runCode();
@@ -51,7 +47,6 @@ function App() {
     }, 100);
   };
 
-  // Stop button handler.
   const handleStop = () => {
     console.log("Stop clicked");
     if (interpreterRef.current) {
@@ -62,7 +57,6 @@ function App() {
     }
   };
 
-  // User input from TerminalPane.
   const handleUserInput = (input) => {
     console.log("User input:", input);
     if (input.trim().toLowerCase() === "clear") {
@@ -132,7 +126,6 @@ function App() {
     else if (dockInfo.edge === "bottom") workspaceStyle.marginBottom = dockInfo.dockSize.height;
   }
 
-  // This callback is passed to ConsolePane so that it can lift its command handler.
   const handleCommandFromConsole = useCallback((handleCommand) => {
     console.log("Setting mascot handler:", handleCommand);
     setMascotHandler(() => handleCommand);
@@ -169,11 +162,6 @@ function App() {
               />
             </div>
           </div>
-  
-          {/* Removed old ChatBase Chatbot panel */}
-          {/* <div className="chatbot-panel" style={{ marginTop: "1rem" }}>
-            <iframe ... />
-          </div> */}
         </div>
   
         <div className="workspace-panel" style={workspaceStyle}>
@@ -184,7 +172,6 @@ function App() {
           />
         </div>
       </div>
-      {/* Render the ChatWidget at the root level so it overlays the app */}
       <ChatWidget />
     </div>
   );

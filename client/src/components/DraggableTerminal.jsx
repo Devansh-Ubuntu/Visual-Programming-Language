@@ -34,7 +34,6 @@ export default function DraggableTerminal({
       const dx = Math.abs(newX - position.x);
       const dy = Math.abs(newY - position.y);
       if (dx > undockMovementThreshold || dy > undockMovementThreshold) {
-        // Undock: restore floating state.
         setPosition(floatingPosition);
         setSize(floatingSize);
         setIsDocked(false);
@@ -51,7 +50,6 @@ export default function DraggableTerminal({
       return;
     }
 
-    // Docking logic.
     setFloatingPosition({ x: newX, y: newY });
     setFloatingSize({ width: size.width, height: size.height });
     if (minDist === distToLeft) {

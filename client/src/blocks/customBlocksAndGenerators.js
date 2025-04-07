@@ -2,9 +2,6 @@
 import * as Blockly from "blockly/core";
 import { javascriptGenerator } from "blockly/javascript";
 
-// --- Input, Delay, Safe‑Get Blocks (unchanged) ---
-
-// Input Block
 Blockly.Blocks["input_block"] = {
   init: function () {
     this.appendDummyInput().appendField("Enter input");
@@ -18,7 +15,6 @@ javascriptGenerator.forBlock["input_block"] = function (block) {
   return ["getInput()", javascriptGenerator.ORDER_FUNCTION_CALL];
 };
 
-// Delay Block
 Blockly.Blocks["delay_block"] = {
   init: function () {
     this.appendDummyInput()
@@ -37,7 +33,6 @@ javascriptGenerator.forBlock["delay_block"] = function (block) {
   return `delay(${secs * 1000});\n`;
 };
 
-// Safe‑Get List Element Block
 Blockly.Blocks["get_list_element_safely"] = {
   init: function () {
     this.appendValueInput("LIST")
@@ -66,7 +61,6 @@ javascriptGenerator.forBlock["get_list_element_safely"] = function (block) {
   return [code, javascriptGenerator.ORDER_FUNCTION_CALL];
 };
 
-// --- Mascot Blocks & Generators ---
 
 Blockly.defineBlocksWithJsonArray([
   {
