@@ -67,17 +67,36 @@ const JSInterpreterRunner = forwardRef(({ code, setTerminalOutput }, ref) => {
               interpreter.setProperty(scope, "mascotCommand", mascotCommandNative);
             });
 
+            // function step() {
+            //   if (stopRequested) return;
+            //   try {
+            //     if (interpreter.step()) {
+            //       setTimeout(step, 1);
+            //     }
+            //   } catch (err) {
+            //     setTerminalOutput((prev) => prev + "Interpreter error: " + err + "\r\n");
+            //     console.error("Interpreter error:", err);
+            //   }
+            // }
+
             function step() {
-              if (stopRequested) return;
               try {
-                if (interpreter.step()) {
-                  setTimeout(step, 1);
+                let steps = 0;
+                const maxStepsPerBatch = 1000; // adjust based on performance
+            
+                while (steps < maxStepsPerBatch && interpreter.step() && !stopRequested) {
+                  steps++;
+                }
+            
+                if (!stopRequested && interpreter.step()) {
+                  setTimeout(step, 0); // Schedule next batch
                 }
               } catch (err) {
                 setTerminalOutput((prev) => prev + "Interpreter error: " + err + "\r\n");
                 console.error("Interpreter error:", err);
               }
             }
+            
             step();
           } catch (error) {
             setTerminalOutput("Error initializing interpreter: " + error + "\r\n");

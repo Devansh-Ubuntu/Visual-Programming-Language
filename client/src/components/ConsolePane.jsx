@@ -174,7 +174,7 @@ const ConsolePane = ({ onCommand }) => {
     const totalSteps = Math.max(10, Math.abs(target) / 5);
     const speed = target / totalSteps;
 
-    setPosition(pos => ({ x: pos.x, y: pos.y - 5 }));
+    setPosition(pos => ({ x: pos.x, y: pos.y - 5}));
     
     let rotated = 0;
     const rotateStep = () => {
@@ -186,7 +186,7 @@ const ConsolePane = ({ onCommand }) => {
           degrees: 0,
           rotation: initialRotation + target
         }));
-        setPosition(pos => ({ x: pos.x, y: pos.y + 5 }));
+        setPosition(pos => ({ x: pos.x, y: pos.y }));
         clearInterval(rotateAnimationRef.current);
         if (animation.onComplete) {
           animation.onComplete();
@@ -223,10 +223,19 @@ const ConsolePane = ({ onCommand }) => {
             type: ANIMATION_TYPES.WALK,
             frameIndex: 0,
             steps: steps,
-            onComplete: doneCallback
+            onComplete: () => {
+              setAnimation(inner => ({
+                ...inner,
+                type: ANIMATION_TYPES.IDLE,
+                frameIndex: 0,
+                steps: 0
+              }));
+              if (doneCallback) doneCallback();
+            }
           }));
           break;
         }
+        
         case "flip":
           setAnimation(prev => ({
             ...prev,
@@ -240,9 +249,18 @@ const ConsolePane = ({ onCommand }) => {
             ...prev,
             type: ANIMATION_TYPES.IDLE,
             degrees: Number(command.value) || 0,
-            onComplete: doneCallback
+            onComplete: () => {
+              setAnimation(inner => ({
+                ...inner,
+                degrees: 0
+              }));
+              if (doneCallback) {
+                doneCallback();
+              }
+            }
           }));
           break;
+          
         case "speak":
           clearTimeout(speakTimeoutRef.current);
           setAnimation(prev => ({
@@ -305,8 +323,8 @@ const ConsolePane = ({ onCommand }) => {
                   ...prev,
                   rotation: 0,
                   type: ANIMATION_TYPES.IDLE,
-                  onComplete: doneCallback
                 }));
+                if (doneCallback) doneCallback();
               }
             }));
           }, 500);

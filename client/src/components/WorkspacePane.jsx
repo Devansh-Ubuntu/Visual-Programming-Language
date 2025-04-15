@@ -122,16 +122,12 @@ export default function WorkspacePane({ setGeneratedCode, onWorkspaceChange, onM
   
       if (workspaceRef.current.getAllBlocks().length === 0) {
         const defaultXML = `
-          <xml>
-            <block type="text_print" x="10" y="10">
-              <value name="TEXT">
-                <shadow type="text">
-                  <field name="TEXT">Hello World</field>
-                </shadow>
-              </value>
-            </block>
-          </xml>
-        `;
+        <xml>
+          <block type="mascot_cross_road" x="10" y="10"></block>
+        </xml>
+      `;      
+      
+      
         const xmlDom = Blockly.Xml.textToDom ? Blockly.Xml.textToDom(defaultXML) : textToDomPolyfill(defaultXML);
         Blockly.Xml.domToWorkspace(xmlDom, workspaceRef.current);
       }
