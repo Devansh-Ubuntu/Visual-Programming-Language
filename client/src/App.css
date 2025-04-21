@@ -3,11 +3,11 @@
 
 :root {
   --scratch-orange: #ff7b26;
-  --scratch-blue: #4C97FF;
-  --scratch-dark-blue: #3373CC;
+  --scratch-blue: #304432;
+  --scratch-dark-blue: #304432;
   --scratch-purple: #9966FF;
-  --scratch-header: #4D97FF;
-  --scratch-header-dark: #4280D7;
+  --scratch-header: #304432;
+  --scratch-header-dark: #304432;
   --scratch-text: #575e75;
   --scratch-background: #f9f9f9;
   --left-panel-width: 480px;
