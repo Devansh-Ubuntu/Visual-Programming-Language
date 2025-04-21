@@ -82,14 +82,14 @@ const JSInterpreterRunner = forwardRef(({ code, setTerminalOutput }, ref) => {
             function step() {
               try {
                 let steps = 0;
-                const maxStepsPerBatch = 1000; // adjust based on performance
+                const maxStepsPerBatch = 1000;
             
                 while (steps < maxStepsPerBatch && interpreter.step() && !stopRequested) {
                   steps++;
                 }
             
                 if (!stopRequested && interpreter.step()) {
-                  setTimeout(step, 0); // Schedule next batch
+                  setTimeout(step, 0);
                 }
               } catch (err) {
                 setTerminalOutput((prev) => prev + "Interpreter error: " + err + "\r\n");
